@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · PHYSICS CORE</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+
 html,body{
   width:100%;
   height:100%;
@@ -14,11 +16,15 @@ html,body{
   font-family:"Courier New",monospace;
   overflow:hidden;
 }
+
+/* ===== BACKGROUND ===== */
 canvas{
   position:fixed;
   inset:0;
   z-index:0;
 }
+
+/* ===== LAYOUT ===== */
 .container{
   position:relative;
   z-index:2;
@@ -29,23 +35,28 @@ canvas{
   gap:20px;
   padding:20px;
 }
+
+/* ===== HEADER ===== */
 .header{
   grid-column:1/-1;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
+
 .title{
   font-size:20px;
   letter-spacing:3px;
   text-shadow:0 0 20px rgba(255,209,102,.8);
 }
+
 .status-bar{
   display:flex;
   gap:20px;
   font-size:11px;
   opacity:.7;
 }
+
 .dot{
   width:6px;height:6px;
   background:#ffd166;
@@ -54,21 +65,27 @@ canvas{
   margin-right:5px;
   animation:pulse 1.5s infinite;
 }
+
 @keyframes pulse{
   0%,100%{opacity:1}
   50%{opacity:.3}
 }
+
+/* ===== LEFT ===== */
 .left-panel{
   display:flex;
   flex-direction:column;
   gap:30px;
 }
+
+/* ===== ROBOT ===== */
 .robot{
   width:220px;
   height:220px;
   position:relative;
   margin:auto;
 }
+
 .head{
   width:130px;
   height:130px;
@@ -81,10 +98,12 @@ canvas{
   box-shadow:0 0 35px rgba(255,209,102,.5);
   animation:float 3s ease-in-out infinite;
 }
+
 @keyframes float{
   0%,100%{transform:translate(-50%,0)}
   50%{transform:translate(-50%,-12px)}
 }
+
 .eye{
   width:26px;height:26px;
   background:#ffd166;
@@ -93,8 +112,10 @@ canvas{
   top:36px;
   box-shadow:0 0 20px #ffd166;
 }
+
 .eye.l{left:28px}
 .eye.r{right:28px}
+
 .mouth{
   width:60px;height:3px;
   background:#ffd166;
@@ -103,6 +124,7 @@ canvas{
   left:50%;
   transform:translateX(-50%);
 }
+
 .body{
   width:110px;height:80px;
   border:2px solid #ffd166;
@@ -114,54 +136,68 @@ canvas{
   background:rgba(255,209,102,.12);
   box-shadow:0 0 25px rgba(255,209,102,.4);
 }
+
 .robot-name{
   text-align:center;
   letter-spacing:2px;
   margin-top:10px;
 }
+
 .robot-title{
   text-align:center;
   font-size:11px;
   opacity:.6;
 }
+
+/* ===== DATA ===== */
 .data{
   font-size:11px;
   display:flex;
   flex-direction:column;
   gap:8px;
 }
+
 .row{
   display:flex;
   justify-content:space-between;
 }
+
+/* ===== CHAT ===== */
 .chat{
   display:flex;
   flex-direction:column;
 }
+
 .chat-title{
   text-align:center;
   margin-bottom:10px;
   opacity:.7;
 }
+
 .messages{
   flex:1;
   overflow-y:auto;
   padding-right:10px;
 }
+
 .msg{
   margin-bottom:14px;
   animation:fade .3s;
 }
+
 @keyframes fade{
   from{opacity:0;transform:translateY(6px)}
   to{opacity:1}
 }
+
 .user{text-align:right;color:#ffe8a3}
 .bot{color:#ffd166}
+
 .input-box{
   display:flex;
   gap:10px;
 }
+
 input{
   flex:1;
   background:rgba(40,30,0,.4);
@@ -169,6 +205,7 @@ input{
   color:#ffd166;
   padding:10px;
 }
+
 button{
   background:rgba(255,209,102,.15);
   border:1px solid #ffd166;
@@ -178,9 +215,13 @@ button{
 }
 </style>
 </head>
+
 <body>
+
 <canvas id="bg"></canvas>
+
 <div class="container">
+
 <div class="header">
   <div class="title">LABORANT.AI2 · PHYSICS</div>
   <div class="status-bar">
@@ -189,6 +230,7 @@ button{
     <span id="state">PHYSICS: OK</span>
   </div>
 </div>
+
 <div class="left-panel">
   <div>
     <div class="robot">
@@ -202,12 +244,14 @@ button{
     <div class="robot-name">LABORANT.AI2</div>
     <div class="robot-title">physics analyst v1.0</div>
   </div>
+
   <div class="data" id="physData">
     <div class="row"><span>photon flux</span><span>—</span></div>
     <div class="row"><span>field strength</span><span>—</span></div>
     <div class="row"><span>entropy drift</span><span>—</span></div>
   </div>
 </div>
+
 <div class="chat">
   <div class="chat-title">💬 ФІЗИЧНА КОНСУЛЬТАЦІЯ</div>
   <div class="messages" id="msgs">
@@ -219,16 +263,125 @@ button{
       • поле<br>
       • ентропія<br>
       • хвиля<br>
-      • ручки, горнятка, рюкзаки...
+      • звіт
     </div>
   </div>
+
   <div class="input-box">
-    <input id="q" placeholder="питання по фізиці або Totobi...">
-    <button id="sendBtn">→</button>
+    <input id="q" placeholder="питання по фізиці…">
+    <button onclick="ask()">→</button>
   </div>
 </div>
+
 </div>
 
-<script src="script.js"></script>
+<script>
+/* ===== BACKGROUND ===== */
+const c=document.getElementById("bg"),x=c.getContext("2d");
+let W,H,p=[];
+function rs(){ W=c.width=innerWidth; H=c.height=innerHeight; 
+  p=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));
+}
+rs(); addEventListener("resize",rs);
+
+function draw(){
+  x.fillStyle="#000"; x.fillRect(0,0,W,H);
+  x.fillStyle="#ffd166";
+  p.forEach(s=>{
+    s.z-=0.4; if(s.z<1)s.z=W;
+    const k=120/s.z;
+    const X=(s.x-W/2)*k+W/2;
+    const Y=(s.y-H/2)*k+H/2;
+    if(X>0&&Y>0&&X<W&&Y<H)x.fillRect(X,Y,1.5,1.5);
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ===== TIME ===== */
+setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
+
+/* ===== PHYSICS API (MODEL) ===== */
+function physicsAPI(){
+  return {
+    photon:(Math.random()*800+200).toFixed(0),
+    field:(Math.random()*50).toFixed(2),
+    entropy:(Math.random()*1.5).toFixed(3)
+  }
+}
+
+function updatePhysics(){
+  const d=physicsAPI();
+  physData.innerHTML=`
+    <div class="row"><span>photon flux</span><span>${d.photon}</span></div>
+    <div class="row"><span>field strength</span><span>${d.field}</span></div>
+    <div class="row"><span>entropy drift</span><span>${d.entropy}</span></div>
+  `;
+}
+setInterval(updatePhysics,3000); updatePhysics();
+
+/* ===== CHAT ===== */
+function ask(){
+  const v=q.value.trim(); if(!v) return;
+  add(v,"user"); q.value="";
+  
+  // якщо запит про звіт, робимо парсинг
+  if(v.toLowerCase().includes("звіт")){
+    fetchReport();
+  } else {
+    setTimeout(()=>add(answer(v),"bot"),400);
+  }
+}
+
+function add(t,cl){
+  const d=document.createElement("div");
+  d.className="msg "+cl;
+  d.innerHTML=t.replace(/\n/g,"<br>");
+  msgs.appendChild(d);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function answer(m){
+  m=m.toLowerCase();
+  if(m.includes("світл")) return "світло — це потік фотонів.\nя аналізую його як енергію, хвилю і подію.";
+  if(m.includes("поле")) return "поле — носій взаємодій.\nелектромагнітне, гравітаційне, фазове.";
+  if(m.includes("ентроп")) return "ентропія — міра невизначеності.\nїї ріст показує напрям часу.";
+  if(m.includes("хвил")) return "хвиля — коливання стану середовища.\nможе бути світловою або матеріальною.";
+  return "я фізик. запитайте про світло, поле, хвилю, ентропію або зробіть звіт.";
+}
+
+q.addEventListener("keydown",e=>e.key==="Enter"&&ask());
+
+/* ===== REPORT PARSER ===== */
+async function fetchReport(){
+  add("формую звіт…","bot");
+  try {
+    const res = await fetch("https://lavandaaudit.github.io/test2/");
+    const txt = await res.text();
+    
+    // створюємо тимчасовий DOM для парсингу
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(txt,"text/html");
+    
+    // приклад: беремо всі <div class="data-row"> (змінити під реальні елементи сторінки)
+    const dataRows = doc.querySelectorAll(".row") || [];
+    let report = "Звіт зі сторінки test2:\n";
+    
+    dataRows.forEach((r,i)=>{
+      report += `• ${r.textContent.trim()}\n`;
+    });
+    
+    if(dataRows.length===0){
+      report += "дані не знайдено, перевірте структуру сторінки.";
+    }
+    
+    add(report,"bot");
+    
+  } catch(e){
+    add("помилка при отриманні даних: "+e,"bot");
+  }
+}
+</script>
+
 </body>
 </html>
