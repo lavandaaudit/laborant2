@@ -5,29 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM CORE</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
 html,body{
-  width:100%;
-  height:100%;
+  width:100%; height:100%;
   background:#000;
   color:#ffd166;
   font-family:"Courier New",monospace;
   overflow:hidden;
 }
-
-/* ===== BACKGROUND ===== */
-canvas{
-  position:fixed;
-  inset:0;
-  z-index:0;
-}
-
-/* ===== LAYOUT ===== */
+canvas{position:fixed; inset:0; z-index:0;}
 .container{
-  position:relative;
-  z-index:2;
+  position:relative; z-index:2;
   height:100vh;
   display:grid;
   grid-template-columns:360px 1fr;
@@ -35,156 +26,76 @@ canvas{
   gap:20px;
   padding:20px;
 }
-
-/* ===== HEADER ===== */
 .header{
   grid-column:1/-1;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-
 .title{
   font-size:20px;
   letter-spacing:3px;
   text-shadow:0 0 20px rgba(255,209,102,.8);
 }
-
 .status-bar{
-  display:flex;
-  gap:20px;
-  font-size:11px;
-  opacity:.7;
+  display:flex; gap:20px; font-size:11px; opacity:.7;
 }
-
 .dot{
-  width:6px;height:6px;
-  background:#ffd166;
-  border-radius:50%;
-  display:inline-block;
-  margin-right:5px;
+  width:6px; height:6px;
+  background:#ffd166; border-radius:50%;
+  display:inline-block; margin-right:5px;
   animation:pulse 1.5s infinite;
 }
-
-@keyframes pulse{
-  0%,100%{opacity:1}
-  50%{opacity:.3}
-}
-
-/* ===== LEFT ===== */
+@keyframes pulse{0%,100%{opacity:1} 50%{opacity:.3}}
 .left-panel{
-  display:flex;
-  flex-direction:column;
-  gap:30px;
+  display:flex; flex-direction:column; gap:30px;
 }
-
-/* ===== ROBOT ===== */
 .robot{
-  width:220px;
-  height:220px;
-  position:relative;
-  margin:auto;
+  width:220px; height:220px; position:relative; margin:auto;
 }
-
 .head{
-  width:130px;
-  height:130px;
-  border:2px solid #ffd166;
-  border-radius:20px;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
+  width:130px; height:130px;
+  border:2px solid #ffd166; border-radius:20px;
+  position:absolute; left:50%; transform:translateX(-50%);
   background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,209,102,.05));
   box-shadow:0 0 35px rgba(255,209,102,.5);
   animation:float 3s ease-in-out infinite;
 }
-
-@keyframes float{
-  0%,100%{transform:translate(-50%,0)}
-  50%{transform:translate(-50%,-12px)}
-}
-
+@keyframes float{0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,-12px)}}
 .eye{
-  width:26px;height:26px;
-  background:#ffd166;
-  border-radius:50%;
-  position:absolute;
-  top:36px;
-  box-shadow:0 0 20px #ffd166;
+  width:26px; height:26px; background:#ffd166; border-radius:50%;
+  position:absolute; top:36px; box-shadow:0 0 20px #ffd166;
 }
-
-.eye.l{left:28px}
-.eye.r{right:28px}
-
+.eye.l{left:28px} .eye.r{right:28px}
 .mouth{
-  width:60px;height:3px;
-  background:#ffd166;
-  position:absolute;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-50%);
+  width:60px; height:3px; background:#ffd166;
+  position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
 }
-
 .body{
-  width:110px;height:80px;
-  border:2px solid #ffd166;
-  border-radius:12px;
-  position:absolute;
-  bottom:0;
-  left:50%;
-  transform:translateX(-50%);
+  width:110px; height:80px;
+  border:2px solid #ffd166; border-radius:12px;
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
   background:rgba(255,209,102,.12);
   box-shadow:0 0 25px rgba(255,209,102,.4);
 }
-
-.robot-name{
-  text-align:center;
-  letter-spacing:2px;
-  margin-top:10px;
-}
-
-.robot-title{
-  text-align:center;
-  font-size:11px;
-  opacity:.6;
-}
-
-/* ===== CHAT ===== */
+.robot-name{text-align:center; letter-spacing:2px; margin-top:10px;}
+.robot-title{text-align:center; font-size:11px; opacity:.6;}
 .chat{
-  display:flex;
-  flex-direction:column;
+  display:flex; flex-direction:column;
 }
-
 .chat-title{
-  text-align:center;
-  margin-bottom:10px;
-  opacity:.7;
+  text-align:center; margin-bottom:10px; opacity:.7;
 }
-
 .messages{
-  flex:1;
-  overflow-y:auto;
-  padding-right:10px;
+  flex:1; overflow-y:auto; padding-right:10px;
 }
-
 .msg{
-  margin-bottom:14px;
-  animation:fade .3s;
+  margin-bottom:14px; animation:fade .3s;
 }
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1}
-}
-
-.user{text-align:right;color:#ffe8a3}
+@keyframes fade{from{opacity:0;transform:translateY(6px)} to{opacity:1}}
+.user{text-align:right; color:#ffe8a3}
 .bot{color:#ffd166}
-
-.input-box{
-  display:flex;
-  gap:10px;
-}
-
+.input-box{display:flex; gap:10px;}
 input{
   flex:1;
   background:rgba(40,30,0,.4);
@@ -192,7 +103,6 @@ input{
   color:#ffd166;
   padding:10px;
 }
-
 button{
   background:rgba(255,209,102,.15);
   border:1px solid #ffd166;
@@ -202,7 +112,6 @@ button{
 }
 </style>
 </head>
-
 <body>
 
 <canvas id="bg"></canvas>
@@ -214,7 +123,7 @@ button{
   <div class="status-bar">
     <span><span class="dot"></span>ONLINE</span>
     <span id="time"></span>
-    <span id="state">IBONARIUM READY</span>
+    <span id="state">IBONARIUM: ACTIVE</span>
   </div>
 </div>
 
@@ -229,103 +138,148 @@ button{
       <div class="body"></div>
     </div>
     <div class="robot-name">LABORANT.AI2</div>
-    <div class="robot-title">Ibonarium assistant v1.0</div>
+    <div class="robot-title">ibonarium fragmentor v1.1</div>
+  </div>
+
+  <div>
+    <button onclick="loadFromGitHub()">Завантажити 1.pdf.pdf з GitHub</button>
   </div>
 </div>
 
 <div class="chat">
-  <div class="chat-title">💬 ІБОНАРІУМ КОНСУЛЬТАЦІЯ</div>
+  <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
   <div class="messages" id="msgs">
     <div class="msg bot">
-      вітаю. я laborant.ai2 — асистент Ібонаріуму.<br>
-      можу брати уривки з PDF та розповідати їх.<br><br>
-      запитайте: <br>
-      • розкажи про Ібонаріум
+      вітаю. я laborant.ai2 — фрагментатор ібонаріуму.<br>
+      беру текст з 1.pdf.pdf і видаю випадкові шматки.<br><br>
+      натисни кнопку вище, потім пиши:<br>
+      • розкажи про ібонаріум<br>
+      • кинь уривок<br>
+      • ібонаріум<br>
+      • ще
     </div>
   </div>
 
   <div class="input-box">
-    <input id="q" placeholder="питання…">
+    <input id="q" placeholder="розкажи про ібонаріум…">
     <button onclick="ask()">→</button>
   </div>
 </div>
 
 </div>
 
-<!-- PDF.js бібліотека -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.313/pdf.min.js"></script>
-
-<script>
+<script type="module">
 /* ===== BACKGROUND ===== */
-const c=document.getElementById("bg"),x=c.getContext("2d");
-let W,H,p=[];
-function rs(){W=c.width=innerWidth;H=c.height=innerHeight;p=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}))}
-rs();addEventListener("resize",rs);
-function draw(){
-  x.fillStyle="#000";x.fillRect(0,0,W,H);
-  x.fillStyle="#ffd166";
-  p.forEach(s=>{
-    s.z-=0.4;if(s.z<1)s.z=W;
-    const k=120/s.z;
-    const X=(s.x-W/2)*k+W/2;
-    const Y=(s.y-H/2)*k+H/2;
-    if(X>0&&Y>0&&X<W&&Y<H)x.fillRect(X,Y,1.5,1.5);
+const c = document.getElementById("bg"), x = c.getContext("2d");
+let W, H, p = [];
+function rs() {
+  W = c.width = innerWidth;
+  H = c.height = innerHeight;
+  p = Array.from({length:120}, () => ({x:Math.random()*W, y:Math.random()*H, z:Math.random()*W}));
+}
+rs(); addEventListener("resize", rs);
+
+function draw() {
+  x.fillStyle = "#000"; x.fillRect(0,0,W,H);
+  x.fillStyle = "#ffd166";
+  p.forEach(s => {
+    s.z -= 0.4; if (s.z < 1) s.z = W;
+    const k = 120 / s.z;
+    const X = (s.x - W/2) * k + W/2;
+    const Y = (s.y - H/2) * k + H/2;
+    if (X>0 && Y>0 && X<W && Y<H) x.fillRect(X, Y, 1.5, 1.5);
   });
   requestAnimationFrame(draw);
 }
 draw();
 
 /* ===== TIME ===== */
-setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
+setInterval(() => time.textContent = new Date().toLocaleTimeString("uk-UA"), 1000);
 
-/* ===== CHAT & PDF ===== */
-let pdfText = [];
+/* ===== PDF LOADING FROM GITHUB ===== */
+import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs";
 
-// Завантаження PDF з GitHub
-async function loadPDF(){
-  const url = 'https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf';
-  const pdf = await pdfjsLib.getDocument(url).promise;
-  let textItems = [];
-  for(let i=1;i<=pdf.numPages;i++){
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    content.items.forEach(item=>textItems.push(item.str));
-  }
-  pdfText = textItems.filter(s=>s.trim()!=="");
-  console.log("PDF завантажено. Рядків:", pdfText.length);
-}
+let chunks = [];
 
-loadPDF();
+async function loadFromGitHub() {
+  const url = "https://github.com/lavandaaudit/laborant2/raw/main/1.pdf.pdf";
+  add("Завантажую 1.pdf.pdf з GitHub...", "bot");
 
-function ask(){
-  const v=q.value.trim(); if(!v)return;
-  add(v,"user"); q.value="";
-  setTimeout(()=>add(answer(v),"bot"),400);
-}
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
 
-function add(t,cl){
-  const d=document.createElement("div");
-  d.className="msg "+cl;
-  d.innerHTML=t.replace(/\n/g,"<br>");
-  msgs.appendChild(d);
-  msgs.scrollTop=msgs.scrollHeight;
-}
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    let fullText = "";
 
-function answer(m){
-  m=m.toLowerCase();
-  if(m.includes("ібонаріум") || m.includes("розкажи")){
-    if(pdfText.length===0) return "завантаження PDF…";
-    let res=[];
-    for(let i=0;i<3;i++){
-      const r = Math.floor(Math.random()*pdfText.length);
-      res.push(pdfText[r]);
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      let pageText = "";
+      content.items.forEach(item => {
+        pageText += item.str;
+        if (item.hasEOL) pageText += "\n";
+      });
+      fullText += pageText + "\n\n";
     }
-    return res.join(' ');
+
+    // Розбиваємо на шматки (параграфи / блоки з пустими рядками)
+    chunks = fullText
+      .split(/\n\s*\n+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 20); // відкидаємо дуже короткі
+
+    add(`Готово. Знайдено ${chunks.length} уривків.`, "bot");
+    add("Тепер можеш запитувати «розкажи про ібонаріум» або «ще»", "bot");
+  } catch (err) {
+    console.error(err);
+    add("Помилка завантаження: " + err.message, "bot");
   }
-  return "я асистент Ібонаріуму. запитайте про Ібонаріум.";
 }
 
-q.addEventListener("keydown",e=>e.key==="Enter"&&ask());
+/* ===== CHAT ===== */
+function ask() {
+  const v = q.value.trim();
+  if (!v) return;
+  add(v, "user");
+  q.value = "";
+  setTimeout(() => add(answer(v), "bot"), 300 + Math.random() * 400);
+}
+
+function add(text, cls) {
+  const d = document.createElement("div");
+  d.className = `msg ${cls}`;
+  d.innerHTML = text.replace(/\n/g, "<br>");
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function answer(msg) {
+  const m = msg.toLowerCase().trim();
+
+  if (m.includes("розкажи") || m.includes("ібонаріум") || m.includes("кинь") || m.includes("ще") || m.includes("фрагмент") || m === "ще") {
+    if (chunks.length === 0) {
+      return "Спочатку завантаж PDF з GitHub (кнопка зверху).";
+    }
+    const idx = Math.floor(Math.random() * chunks.length);
+    let fragment = chunks[idx];
+
+    // Якщо уривок надто довгий — обрізаємо до ~800 символів
+    if (fragment.length > 1200) {
+      fragment = fragment.slice(0, 1100) + "... (продовження в оригіналі)";
+    }
+
+    return fragment;
+  }
+
+  return "Я видаю випадкові уривки з Ібонаріуму.<br>Спробуй: «розкажи про ібонаріум», «ще», «кинь уривок»";
+}
+
+q.addEventListener("keydown", e => {
+  if (e.key === "Enter") ask();
+});
 </script>
 
 </body>
