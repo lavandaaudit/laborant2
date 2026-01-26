@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.min.js"></script> <!-- класична версія, без module, бо простіше -->
+<!-- pdf.js v4 з CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -49,7 +50,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="status-bar">
       <span><span class="dot"></span>ONLINE</span>
       <span id="time"></span>
-      <span id="state">LOADING...</span>
+      <span id="state">LOADING PDF...</span>
     </div>
   </div>
 
@@ -64,7 +65,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
         <div class="body"></div>
       </div>
       <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-title">ibonarium fragmentor v1.3</div>
+      <div class="robot-title">ibonarium fragmentor v1.4</div>
     </div>
   </div>
 
@@ -73,13 +74,13 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="messages" id="msgs">
       <div class="msg bot">
         вітаю. я laborant.ai2 — видавач уривків ібонаріуму.<br>
-        зараз завантажую <b>1.pdf.pdf</b> з GitHub...<br>
-        зачекай 5–15 секунд
+        зараз завантажую 1.pdf.pdf з GitHub (raw)...<br>
+        зачекай 5–20 секунд (залежить від розміру PDF)
       </div>
     </div>
 
     <div class="input-box">
-      <input id="q" placeholder="розкажи про ібонаріум / ще / уривок / кинь">
+      <input id="q" placeholder="розкажи про ібонаріум / ще / кинь уривок">
       <button onclick="ask()">→</button>
     </div>
   </div>
@@ -90,20 +91,18 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
 const c = document.getElementById("bg"), ctx = c.getContext("2d");
 let W, H, particles = [];
 function resize() {
-  W = c.width = innerWidth;
-  H = c.height = innerHeight;
-  particles = Array.from({length:120}, ()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));
+  W = c.width = innerWidth; H = c.height = innerHeight;
+  particles = Array.from({length:120}, ()=>({x:Math.random()*W, y:Math.random()*H, z:Math.random()*W}));
 }
 resize(); window.addEventListener("resize", resize);
-
 function drawBg() {
   ctx.fillStyle = "#000"; ctx.fillRect(0,0,W,H);
   ctx.fillStyle = "#ffd166";
   particles.forEach(p => {
     p.z -= 0.4; if (p.z < 1) p.z = W;
-    const scale = 120 / p.z;
-    const px = (p.x - W/2) * scale + W/2;
-    const py = (p.y - H/2) * scale + H/2;
+    const k = 120 / p.z;
+    const px = (p.x - W/2)*k + W/2;
+    const py = (p.y - H/2)*k + H/2;
     if (px>0 && py>0 && px<W && py<H) ctx.fillRect(px, py, 1.5, 1.5);
   });
   requestAnimationFrame(drawBg);
@@ -113,55 +112,60 @@ drawBg();
 // TIME
 setInterval(() => document.getElementById("time").textContent = new Date().toLocaleTimeString("uk-UA"), 1000);
 
-// PDF.js (не модульна версія для простоти)
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.worker.min.js';
+// PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
 
 let fragments = [];
 
 async function loadIbonarium() {
   const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf";
-  add("Завантажую PDF з raw.githubusercontent.com...", "bot");
+  add("Починаю завантаження PDF...", "bot");
 
   try {
-    const response = await fetch(url, { mode: 'cors' });
+    const response = await fetch(url, { 
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: { 'Accept': 'application/pdf' }
+    });
+
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} — файл не знайдено або доступ заборонено`);
+      throw new Error(`Сервер відповів ${response.status} — ${response.statusText}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    add("PDF завантажено (" + (arrayBuffer.byteLength / 1024).toFixed(1) + " KB), парсимо текст...", "bot");
+
+    const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+    const pdf = await loadingTask.promise;
 
     let fullText = "";
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      let pageText = "";
-      content.items.forEach(item => {
-        pageText += item.str;
-        if (item.hasEOL) pageText += "\n";
-      });
+      let pageText = content.items.map(item => item.str).join(' ');
       fullText += pageText + "\n\n";
     }
 
     fragments = fullText
-      .split(/\n\s*\n+/)
-      .map(chunk => chunk.trim())
-      .filter(chunk => chunk.length > 40); // мінімум символів для змістовності
+      .split(/\n{2,}/)
+      .map(s => s.trim())
+      .filter(s => s.length > 50);
 
     if (fragments.length === 0) {
-      add("PDF завантажено, але текст не знайдено (можливо сканований PDF без selectable text).", "bot");
+      add("Текст витягнуто, але немає достатньо довгих уривків (можливо PDF — скан або зображення).", "bot");
     } else {
-      document.getElementById("state").textContent = `FRAGMENTS: ${fragments.length}`;
-      add(`Готово! Знайдено ${fragments.length} уривків. Пиши «розкажи», «ще», «кинь», «ібонаріум»`, "bot");
+      document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
+      add(`Успіх! Знайдено ${fragments.length} уривків. Тепер пиши: «розкажи», «ще», «ібонаріум», «кинь» тощо.`, "bot");
     }
   } catch (err) {
-    console.error("Помилка:", err);
-    add(`Не вдалося завантажити PDF:<br><b>${err.message}</b><br>Перевір посилання вручну:<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити PDF</a>`, "bot");
+    console.error("Завантаження/парсинг помилка:", err);
+    add(`Помилка: ${err.message}<br><br>Спробуй:<br>1. Відкрий посилання вручну → <a href="${url}" target="_blank" style="color:#ffd166;">${url}</a><br>2. Якщо відкривається — проблема в браузері (CORS, розширення, VPN). Спробуй інший браузер.<br>3. Якщо 404 — файл видалено.`, "bot");
     document.getElementById("state").textContent = "ERROR";
   }
 }
 
-loadIbonarium(); // запускаємо автоматично
+loadIbonarium();
 
 // CHAT
 function add(text, cls = "bot") {
@@ -170,39 +174,31 @@ function add(text, cls = "bot") {
   div.innerHTML = text.replace(/\n/g, "<br>");
   const msgs = document.getElementById("msgs");
   msgs.appendChild(div);
-  div.scrollIntoView({behavior: "smooth"});
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
 function ask() {
-  const input = document.getElementById("q");
-  const val = input.value.trim();
+  const q = document.getElementById("q");
+  const val = q.value.trim();
   if (!val) return;
   add(val, "user");
-  input.value = "";
-  setTimeout(() => {
-    add(getResponse(val), "bot");
-  }, 300 + Math.random() * 700);
+  q.value = "";
+  setTimeout(() => add(getResponse(val), "bot"), 500);
 }
 
-function getResponse(query) {
-  const q = query.toLowerCase();
-  if (q.includes("ібо") || q.includes("розкажи") || q.includes("ще") || q.includes("урив") || q.includes("фрагмент") || q.includes("кинь") || q === "") {
-    if (fragments.length === 0) {
-      return "PDF ще не завантажився або порожній.\nЗачекай трохи або перевір консоль браузера (F12).";
-    }
-    const randomIdx = Math.floor(Math.random() * fragments.length);
-    let fragment = fragments[randomIdx];
-    if (fragment.length > 1100) {
-      fragment = fragment.substring(0, 1000) + "\n… (продовження в оригінальному PDF)";
-    }
-    return fragment;
+function getResponse(q) {
+  const low = q.toLowerCase();
+  if (low.includes("ібо") || low.includes("розкажи") || low.includes("ще") || low.includes("кинь") || low.includes("урив") || low.includes("фрагмент")) {
+    if (!fragments.length) return "PDF ще не оброблено. Почекай або перезавантаж сторінку.";
+    const idx = Math.floor(Math.random() * fragments.length);
+    let frag = fragments[idx];
+    if (frag.length > 1200) frag = frag.slice(0, 1100) + "\n… (продовження)";
+    return frag;
   }
-  return "Просто пиши фразу з «ібонаріум», «розкажи», «ще», «кинь уривок» — видам випадковий шматок тексту з PDF.";
+  return "Пиши будь-яке повідомлення з «ібонаріум», «розкажи», «ще», «кинь» — видам випадковий уривок.";
 }
 
-document.getElementById("q").addEventListener("keydown", e => {
-  if (e.key === "Enter") ask();
-});
+document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
 </script>
 </body>
 </html>
