@@ -7,215 +7,37 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
-html,body{
-  width:100%;
-  height:100%;
-  background:#000;
-  color:#ffd166;
-  font-family:"Courier New",monospace;
-  overflow:hidden;
-}
-
-/* ===== BACKGROUND ===== */
-canvas{
-  position:fixed;
-  inset:0;
-  z-index:0;
-}
-
-/* ===== LAYOUT ===== */
-.container{
-  position:relative;
-  z-index:2;
-  height:100vh;
-  display:grid;
-  grid-template-columns:360px 1fr;
-  grid-template-rows:60px 1fr;
-  gap:20px;
-  padding:20px;
-}
-
-/* ===== HEADER ===== */
-.header{
-  grid-column:1/-1;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.title{
-  font-size:20px;
-  letter-spacing:3px;
-  text-shadow:0 0 20px rgba(255,209,102,.8);
-}
-
-.status-bar{
-  display:flex;
-  gap:20px;
-  font-size:11px;
-  opacity:.7;
-}
-
-.dot{
-  width:6px;height:6px;
-  background:#ffd166;
-  border-radius:50%;
-  display:inline-block;
-  margin-right:5px;
-  animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse{
-  0%,100%{opacity:1}
-  50%{opacity:.3}
-}
-
-/* ===== LEFT ===== */
-.left-panel{
-  display:flex;
-  flex-direction:column;
-  gap:30px;
-}
-
-/* ===== ROBOT ===== */
-.robot{
-  width:220px;
-  height:220px;
-  position:relative;
-  margin:auto;
-}
-
-.head{
-  width:130px;
-  height:130px;
-  border:2px solid #ffd166;
-  border-radius:20px;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,209,102,.05));
-  box-shadow:0 0 35px rgba(255,209,102,.5);
-  animation:float 3s ease-in-out infinite;
-}
-
-@keyframes float{
-  0%,100%{transform:translate(-50%,0)}
-  50%{transform:translate(-50%,-12px)}
-}
-
-.eye{
-  width:26px;height:26px;
-  background:#ffd166;
-  border-radius:50%;
-  position:absolute;
-  top:36px;
-  box-shadow:0 0 20px #ffd166;
-}
-
-.eye.l{left:28px}
-.eye.r{right:28px}
-
-.mouth{
-  width:60px;height:3px;
-  background:#ffd166;
-  position:absolute;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.body{
-  width:110px;height:80px;
-  border:2px solid #ffd166;
-  border-radius:12px;
-  position:absolute;
-  bottom:0;
-  left:50%;
-  transform:translateX(-50%);
-  background:rgba(255,209,102,.12);
-  box-shadow:0 0 25px rgba(255,209,102,.4);
-}
-
-.robot-name{
-  text-align:center;
-  letter-spacing:2px;
-  margin-top:10px;
-}
-
-.robot-title{
-  text-align:center;
-  font-size:11px;
-  opacity:.6;
-}
-
-/* ===== DATA ===== */
-.data{
-  font-size:11px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.row{
-  display:flex;
-  justify-content:space-between;
-}
-
-/* ===== CHAT ===== */
-.chat{
-  display:flex;
-  flex-direction:column;
-}
-
-.chat-title{
-  text-align:center;
-  margin-bottom:10px;
-  opacity:.7;
-}
-
-.messages{
-  flex:1;
-  overflow-y:auto;
-  padding-right:10px;
-}
-
-.msg{
-  margin-bottom:14px;
-  animation:fade .3s;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1}
-}
-
-.user{text-align:right;color:#ffe8a3}
-.bot{color:#ffd166}
-
-.input-box{
-  display:flex;
-  gap:10px;
-}
-
-input{
-  flex:1;
-  background:rgba(40,30,0,.4);
-  border:1px solid rgba(255,209,102,.4);
-  color:#ffd166;
-  padding:10px;
-}
-
-button{
-  background:rgba(255,209,102,.15);
-  border:1px solid #ffd166;
-  color:#ffd166;
-  padding:10px 18px;
-  cursor:pointer;
-}
+html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
+canvas{position:fixed;inset:0;z-index:0;}
+.container{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:360px 1fr;grid-template-rows:60px 1fr;gap:20px;padding:20px;}
+.header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;}
+.title{font-size:20px;letter-spacing:3px;text-shadow:0 0 20px rgba(255,209,102,.8);}
+.status-bar{display:flex;gap:20px;font-size:11px;opacity:.7;}
+.dot{width:6px;height:6px;background:#ffd166;border-radius:50%;display:inline-block;margin-right:5px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.left-panel{display:flex;flex-direction:column;gap:30px;}
+.robot{width:220px;height:220px;position:relative;margin:auto;}
+.head{width:130px;height:130px;border:2px solid #ffd166;border-radius:20px;position:absolute;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,209,102,.05));box-shadow:0 0 35px rgba(255,209,102,.5);animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-12px)}}
+.eye{width:26px;height:26px;background:#ffd166;border-radius:50%;position:absolute;top:36px;box-shadow:0 0 20px #ffd166;}
+.eye.l{left:28px}.eye.r{right:28px}
+.mouth{width:60px;height:3px;background:#ffd166;position:absolute;bottom:30px;left:50%;transform:translateX(-50%);}
+.body{width:110px;height:80px;border:2px solid #ffd166;border-radius:12px;position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(255,209,102,.12);box-shadow:0 0 25px rgba(255,209,102,.4);}
+.robot-name{text-align:center;letter-spacing:2px;margin-top:10px;}
+.robot-title{text-align:center;font-size:11px;opacity:.6;}
+.data{font-size:11px;display:flex;flex-direction:column;gap:8px;}
+.row{display:flex;justify-content:space-between;}
+.chat{display:flex;flex-direction:column;}
+.chat-title{text-align:center;margin-bottom:10px;opacity:.7;}
+.messages{flex:1;overflow-y:auto;padding-right:10px;}
+.msg{margin-bottom:14px;animation:fade .3s;}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.user{text-align:right;color:#ffe8a3}.bot{color:#ffd166}
+.input-box{display:flex;gap:10px;}
+input{flex:1;background:rgba(40,30,0,.4);border:1px solid rgba(255,209,102,.4);color:#ffd166;padding:10px;}
+button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;padding:10px 18px;cursor:pointer;}
 </style>
 </head>
-
 <body>
 
 <canvas id="bg"></canvas>
@@ -279,55 +101,20 @@ button{
 /* ===== BACKGROUND ===== */
 const c=document.getElementById("bg"),x=c.getContext("2d");
 let W,H,p=[];
-function rs(){ W=c.width=innerWidth; H=c.height=innerHeight; 
-  p=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));
-}
+function rs(){ W=c.width=innerWidth; H=c.height=innerHeight; p=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W})); }
 rs(); addEventListener("resize",rs);
-
-function draw(){
-  x.fillStyle="#000"; x.fillRect(0,0,W,H);
-  x.fillStyle="#ffd166";
-  p.forEach(s=>{
-    s.z-=0.4; if(s.z<1)s.z=W;
-    const k=120/s.z;
-    const X=(s.x-W/2)*k+W/2;
-    const Y=(s.y-H/2)*k+H/2;
-    if(X>0&&Y>0&&X<W&&Y<H)x.fillRect(X,Y,1.5,1.5);
-  });
-  requestAnimationFrame(draw);
-}
+function draw(){ x.fillStyle="#000"; x.fillRect(0,0,W,H); x.fillStyle="#ffd166"; p.forEach(s=>{ s.z-=0.4;if(s.z<1)s.z=W; const k=120/s.z; const X=(s.x-W/2)*k+W/2; const Y=(s.y-H/2)*k+H/2; if(X>0&&Y>0&&X<W&&Y<H)x.fillRect(X,Y,1.5,1.5); }); requestAnimationFrame(draw);}
 draw();
 
 /* ===== TIME ===== */
 setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
 
-/* ===== PHYSICS API (MODEL) ===== */
-function physicsAPI(){
-  return {
-    photon:(Math.random()*800+200).toFixed(0),
-    field:(Math.random()*50).toFixed(2),
-    entropy:(Math.random()*1.5).toFixed(3)
-  }
-}
-
-function updatePhysics(){
-  const d=physicsAPI();
-  physData.innerHTML=`
-    <div class="row"><span>photon flux</span><span>${d.photon}</span></div>
-    <div class="row"><span>field strength</span><span>${d.field}</span></div>
-    <div class="row"><span>entropy drift</span><span>${d.entropy}</span></div>
-  `;
-}
-setInterval(updatePhysics,3000); updatePhysics();
-
 /* ===== CHAT ===== */
 function ask(){
   const v=q.value.trim(); if(!v) return;
   add(v,"user"); q.value="";
-  
-  // якщо запит про звіт, робимо парсинг
   if(v.toLowerCase().includes("звіт")){
-    fetchReport();
+    fetchReport(); // робимо живий звіт
   } else {
     setTimeout(()=>add(answer(v),"bot"),400);
   }
@@ -352,28 +139,39 @@ function answer(m){
 
 q.addEventListener("keydown",e=>e.key==="Enter"&&ask());
 
-/* ===== REPORT PARSER ===== */
+/* ===== LIVE DATA PARSER ===== */
 async function fetchReport(){
-  add("формую звіт…","bot");
+  add("формую живий звіт…","bot");
   try {
     const res = await fetch("https://lavandaaudit.github.io/test2/");
     const txt = await res.text();
-    
-    // створюємо тимчасовий DOM для парсингу
     const parser = new DOMParser();
     const doc = parser.parseFromString(txt,"text/html");
+    const rows = doc.querySelectorAll(".row");
     
-    // приклад: беремо всі <div class="data-row"> (змінити під реальні елементи сторінки)
-    const dataRows = doc.querySelectorAll(".row") || [];
-    let report = "Звіт зі сторінки test2:\n";
+    if(rows.length === 0){
+      add("дані не знайдено, можливо змінилась структура сторінки","bot");
+      return;
+    }
     
-    dataRows.forEach((r,i)=>{
-      report += `• ${r.textContent.trim()}\n`;
+    let report = "🔹 Звіт (живі дані):\n";
+    let liveData = {};
+    
+    rows.forEach(r=>{
+      const key = r.querySelector("span:first-child")?.textContent.trim();
+      const val = r.querySelector("span:last-child")?.textContent.trim();
+      if(key && val){
+        report += `• ${key}: ${val}\n`;
+        liveData[key.toLowerCase()] = val;
+      }
     });
     
-    if(dataRows.length===0){
-      report += "дані не знайдено, перевірте структуру сторінки.";
-    }
+    // оновлюємо панель фізики ліворуч
+    physData.innerHTML = `
+      <div class="row"><span>photon flux</span><span>${liveData["photon flux"] || "—"}</span></div>
+      <div class="row"><span>field strength</span><span>${liveData["field strength"] || "—"}</span></div>
+      <div class="row"><span>entropy drift</span><span>${liveData["entropy drift"] || "—"}</span></div>
+    `;
     
     add(report,"bot");
     
@@ -381,6 +179,9 @@ async function fetchReport(){
     add("помилка при отриманні даних: "+e,"bot");
   }
 }
+
+/* ===== AUTO REFRESH DATA ===== */
+setInterval(fetchReport,10000); // кожні 10 секунд оновлюємо живі дані
 </script>
 
 </body>
