@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LABORANT.AI2 · PHYSICS LIVE</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
+canvas{position:fixed;inset:0;z-index:0;}
+.container{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:360px 1fr;grid-template-rows:60px 1fr;gap:20px;padding:20px;}
+.header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;}
+.title{font-size:20px;letter-spacing:3px;text-shadow:0 0 20px rgba(255,209,102,.8);}
+.status-bar{display:flex;gap:20px;font-size:11px;opacity:.7;}
+.dot{width:6px;height:6px;background:#ffd166;border-radius:50%;display:inline-block;margin-right:5px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3;}}
+.left-panel{display:flex;flex-direction:column;gap:30px;}
+.robot{width:220px;height:220px;position:relative;margin:auto;}
+.head{width:130px;height:130px;border:2px solid #ffd166;border-radius:20px;position:absolute;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,209,102,.05));box-shadow:0 0 35px rgba(255,209,102,.5);animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-12px)}}
+.eye{width:26px;height:26px;background:#ffd166;border-radius:50%;position:absolute;top:36px;box-shadow:0 0 20px #ffd166;}
+.eye.l{left:28px}.eye.r{right:28px}
+.mouth{width:60px;height:3px;background:#ffd166;position:absolute;bottom:30px;left:50%;transform:translateX(-50%);}
+.body{width:110px;height:80px;border:2px solid #ffd166;border-radius:12px;position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(255,209,102,.12);box-shadow:0 0 25px rgba(255,209,102,.4);}
+.robot-name{text-align:center;letter-spacing:2px;margin-top:10px;}
+.robot-title{text-align:center;font-size:11px;opacity:.6;}
+.data{font-size:11px;display:flex;flex-direction:column;gap:8px;}
+.row{display:flex;justify-content:space-between;}
+.chat{display:flex;flex-direction:column;}
+.chat-title{text-align:center;margin-bottom:10px;opacity:.7;}
+.messages{flex:1;overflow-y:auto;padding-right:10px;}
+.msg{margin-bottom:14px;animation:fade .3s;}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.user{text-align:right;color:#ffe8a3}
+.bot{color:#ffd166}
+.input-box{display:flex;gap:10px;}
+input{flex:1;background:rgba(40,30,0,.4);border:1px solid rgba(255,209,102,.4);color:#ffd166;padding:10px;}
+button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;padding:10px 18px;cursor:pointer;}
+.chart-container{width:100%;height:150px;background:rgba(0,0,0,.3);border:1px solid #ffd166;padding:5px;overflow:hidden;}
+</style>
+</head>
+
+<body>
+<canvas id="bg"></canvas>
+
+<div class="container">
+
+<div class="header">
+  <div class="title">LABORANT.AI2 · PHYSICS LIVE</div>
+  <div class="status-bar">
+    <span><span class="dot"></span>ONLINE</span>
+    <span id="time"></span>
+    <span id="state">PHYSICS: OK</span>
+  </div>
+</div>
+
+<div class="left-panel">
+  <div>
+    <div class="robot">
+      <div class="head">
+        <div class="eye l"></div>
+        <div class="eye r"></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="body"></div>
+    </div>
+    <div class="robot-name">LABORANT.AI2</div>
+    <div class="robot-title">physics analyst v3.0</div>
+  </div>
+
+  <div class="data" id="physData">
+    <div class="row"><span>photon flux</span><span>—</span></div>
+    <div class="row"><span>field strength</span><span>—</span></div>
+    <div class="row"><span>entropy drift</span><span>—</span></div>
+    <div class="row"><span>temperature</span><span>—</span></div>
+    <div class="row"><span>energy</span><span>—</span></div>
+  </div>
+
+  <div class="chart-container" id="chart"></div>
+</div>
+
+<div class="chat">
+  <div class="chat-title">💬 ФІЗИЧНА КОНСУЛЬТАЦІЯ</div>
+  <div class="messages" id="msgs">
+    <div class="msg bot">
+      Вітаю. Я LABORANT.AI2 — фізичний аналітик.<br>
+      Можу аналізувати світло, поле, ентропію, енергію та хвилі.<br><br>
+      Запитайте про: <br>
+      • світло<br>
+      • поле<br>
+      • ентропія<br>
+      • хвилі<br>
+      • енергію<br>
+      • температуру
+    </div>
+  </div>
+
+  <div class="input-box">
+    <input id="q" placeholder="питання по фізиці…">
+    <button onclick="ask()">→</button>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+/* ===== BACKGROUND ===== */
+const c=document.getElementById("bg"),x=c.getContext("2d");
+let W,H,p=[];
+function rs(){W=c.width=innerWidth;H=c.height=innerHeight;p=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));}
+rs();addEventListener("resize",rs);
+function draw(){x.fillStyle="#000";x.fillRect(0,0,W,H);x.fillStyle="#ffd166";p.forEach(s=>{s.z-=0.4;if(s.z<1)s.z=W;const k=120/s.z;const X=(s.x-W/2)*k+W/2;const Y=(s.y-H/2)*k+H/2;if(X>0&&Y>0&&X<W&&Y<H)x.fillRect(X,Y,1.5,1.5);});requestAnimationFrame(draw);}
+draw();
+
+/* ===== TIME ===== */
+setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
+
+/* ===== HISTORY ===== */
+let history={photon:[],field:[],entropy:[],temperature:[],energy:[]};
+
+/* ===== NASA / CERN API SETTINGS ===== */
+const NASA_API_KEY="DEMO_KEY"; // заміни на свій ключ
+async function fetchSolarFlare(){
+    try{
+        const res=await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=2026-01-25&endDate=2026-01-26&api_key=${NASA_API_KEY}`);
+        const data=await res.json();
+        if(data.length) return data[0]; // останній флар
+        return {};
+    }catch(e){return {};}
+}
+async function fetchCERN(){
+    try{
+        const res=await fetch("https://opendata.cern.ch/api/records/1.0/search/?dataset=lhc-open-data&rows=1"); // приклад
+        const data=await res.json();
+        if(data.records?.length) return {particleEnergy:data.records[0].fields.energy || 0, collisions:data.records[0].fields.collisions || 0};
+        return {particleEnergy:0,collisions:0};
+    }catch(e){return {particleEnergy:0,collisions:0};}
+}
+
+/* ===== PHYSICS MODEL (LIVE + SIMULATION) ===== */
+async function physicsAPI(){
+    const sim={photon:(Math.random()*800+200).toFixed(0),
+               field:(Math.random()*50).toFixed(2),
+               entropy:(Math.random()*1.5).toFixed(3),
+               temperature:(Math.random()*300+200).toFixed(1),
+               energy:(Math.random()*1000+100).toFixed(2)};
+    const solar=await fetchSolarFlare();
+    const cern=await fetchCERN();
+    const combined={
+        photon: solar.energy?.toFixed(0) || sim.photon,
+        field: sim.field,
+        entropy: sim.entropy,
+        temperature: sim.temperature,
+        energy: cern.particleEnergy?.toFixed(0) || sim.energy
+    };
+    // зберігаємо історію
+    Object.keys(history).forEach(k=>{
+        history[k].push(combined[k]);
+        if(history[k].length>20) history[k].shift();
+    });
+    return combined;
+}
+
+/* ===== UPDATE PANEL & CHART ===== */
+const ctx=document.createElement("canvas");chart.appendChild(ctx);
+const cjs=new Chart(ctx,{type:'line',data:{labels:Array(20).fill(''),datasets:[
+    {label:'Photon',borderColor:'#ffd166',data:[],fill:false},
+    {label:'Field',borderColor:'#ff6d00',data:[],fill:false},
+    {label:'Entropy',borderColor:'#06d6a0',data:[],fill:false}
+]},options:{responsive:true,animation:false,plugins:{legend:{display:true}}}});
+
+async function updatePhysics(){
+    const d=await physicsAPI();
+    physData.innerHTML=`
+      <div class="row"><span>photon flux</span><span>${d.photon}</span></div>
+      <div class="row"><span>field strength</span><span>${d.field}</span></div>
+      <div class="row"><span>entropy drift</span><span>${d.entropy}</span></div>
+      <div class="row"><span>temperature</span><span>${d.temperature}</span></div>
+      <div class="row"><span>energy</span><span>${d.energy}</span></div>
+    `;
+    // оновлення графіка
+    cjs.data.labels=history.photon.map((_,i)=>i+1);
+    cjs.data.datasets[0].data=history.photon.map(Number);
+    cjs.data.datasets[1].data=history.field.map(Number);
+    cjs.data.datasets[2].data=history.entropy.map(Number);
+    cjs.update();
+}
+setInterval(updatePhysics,5000);updatePhysics();
+
+/* ===== CHAT ===== */
+function ask(){const v=q.value.trim();if(!v)return;add(v,"user");q.value="";setTimeout(()=>add(answer(v),"bot"),400);}
+function add(t,cl){const d=document.createElement("div");d.className="msg "+cl;d.innerHTML=t.replace(/\n/g,"<br>");msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;}
+function answer(m){
+  m=m.toLowerCase();
+  if(m.includes("світл")) return "Світло — це потік фотонів.\nЯ аналізую його як енергію, хвилю і подію.";
+  if(m.includes("поле")) return "Поле — носій взаємодій.\nЕлектромагнітне, гравітаційне, фазове.";
+  if(m.includes("ентроп")) return "Ентропія — міра невизначеності.\nЇї ріст показує напрям часу.";
+  if(m.includes("хвил")) return "Хвиля — коливання стану середовища.\nМоже бути світловою або матеріальною.";
+  if(m.includes("енергі")) return "Енергія — здатність виконувати роботу.\nОбчислюється як кінетична, потенційна чи теплове поле.";
+  if(m.includes("темпер")) return "Температура — показник середньої кінетичної енергії частинок.\nВажлива для фазових переходів.";
+  return "Я фізик. Запитайте про світло, поле, хвилю, ентропію, енергію або температуру.";
+}
+q.addEventListener("keydown",e=>e.key==="Enter"&&ask());
+</script>
+</body>
+</html>
