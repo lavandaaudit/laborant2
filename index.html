@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM</title>
 
-<!-- pdf.js v4 з CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 
 <style>
@@ -65,7 +64,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
         <div class="body"></div>
       </div>
       <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-title">ibonarium fragmentor v1.4</div>
+      <div class="robot-title">ibonarium fragmentor v1.5</div>
     </div>
   </div>
 
@@ -73,132 +72,119 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
     <div class="messages" id="msgs">
       <div class="msg bot">
-        вітаю. я laborant.ai2 — видавач уривків ібонаріуму.<br>
-        зараз завантажую 1.pdf.pdf з GitHub (raw)...<br>
-        зачекай 5–20 секунд (залежить від розміру PDF)
+        вітаю, Романе. я laborant.ai2 — видавач уривків ібонаріуму.<br>
+        завантажую https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf ...<br>
+        зачекай 5–20 секунд
       </div>
     </div>
 
     <div class="input-box">
-      <input id="q" placeholder="розкажи про ібонаріум / ще / кинь уривок">
+      <input id="q" placeholder="розкажи про ібонаріум / ще / кинь">
       <button onclick="ask()">→</button>
     </div>
   </div>
 </div>
 
 <script>
-// BACKGROUND
+// ФОН
 const c = document.getElementById("bg"), ctx = c.getContext("2d");
-let W, H, particles = [];
-function resize() {
-  W = c.width = innerWidth; H = c.height = innerHeight;
-  particles = Array.from({length:120}, ()=>({x:Math.random()*W, y:Math.random()*H, z:Math.random()*W}));
+let W, H, p = [];
+function rs() {
+  W = c.width = innerWidth;
+  H = c.height = innerHeight;
+  p = Array.from({length:120}, ()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));
 }
-resize(); window.addEventListener("resize", resize);
-function drawBg() {
-  ctx.fillStyle = "#000"; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle = "#ffd166";
-  particles.forEach(p => {
-    p.z -= 0.4; if (p.z < 1) p.z = W;
-    const k = 120 / p.z;
-    const px = (p.x - W/2)*k + W/2;
-    const py = (p.y - H/2)*k + H/2;
-    if (px>0 && py>0 && px<W && py<H) ctx.fillRect(px, py, 1.5, 1.5);
+rs(); addEventListener("resize", rs);
+function draw() {
+  ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#ffd166";
+  p.forEach(s=>{
+    s.z-=0.4; if(s.z<1)s.z=W;
+    const k=120/s.z;
+    const X=(s.x-W/2)*k+W/2;
+    const Y=(s.y-H/2)*k+H/2;
+    if(X>0&&Y>0&&X<W&&Y<H)ctx.fillRect(X,Y,1.5,1.5);
   });
-  requestAnimationFrame(drawBg);
+  requestAnimationFrame(draw);
 }
-drawBg();
+draw();
 
-// TIME
-setInterval(() => document.getElementById("time").textContent = new Date().toLocaleTimeString("uk-UA"), 1000);
+// ЧАС
+setInterval(()=>document.getElementById("time").textContent=new Date().toLocaleTimeString("uk-UA"),1000);
 
 // PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
 
 let fragments = [];
 
-async function loadIbonarium() {
+async function loadPDF() {
   const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf";
-  add("Починаю завантаження PDF...", "bot");
+  add("Починаю завантаження з raw.githubusercontent.com...", "bot");
 
   try {
-    const response = await fetch(url, { 
-      method: 'GET',
-      mode: 'cors',
-      credentials: 'omit',
-      headers: { 'Accept': 'application/pdf' }
-    });
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = await res.arrayBuffer();
+    add(`PDF отримано (${(buf.byteLength/1024).toFixed(1)} KB), парсимо...`, "bot");
 
-    if (!response.ok) {
-      throw new Error(`Сервер відповів ${response.status} — ${response.statusText}`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    add("PDF завантажено (" + (arrayBuffer.byteLength / 1024).toFixed(1) + " KB), парсимо текст...", "bot");
-
-    const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
-    const pdf = await loadingTask.promise;
-
-    let fullText = "";
-    for (let i = 1; i <= pdf.numPages; i++) {
+    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+    let txt = "";
+    for (let i=1; i<=pdf.numPages; i++) {
       const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      let pageText = content.items.map(item => item.str).join(' ');
-      fullText += pageText + "\n\n";
+      const c = await page.getTextContent();
+      txt += c.items.map(it=>it.str).join(' ') + "\n\n";
     }
 
-    fragments = fullText
-      .split(/\n{2,}/)
-      .map(s => s.trim())
-      .filter(s => s.length > 50);
+    fragments = txt.split(/\n{2,}/)
+      .map(s=>s.trim())
+      .filter(s=>s.length>60);
 
-    if (fragments.length === 0) {
-      add("Текст витягнуто, але немає достатньо довгих уривків (можливо PDF — скан або зображення).", "bot");
+    if (fragments.length===0) {
+      add("Текст витягнуто, але уривків мало (можливо PDF з малим текстом).", "bot");
     } else {
-      document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
-      add(`Успіх! Знайдено ${fragments.length} уривків. Тепер пиши: «розкажи», «ще», «ібонаріум», «кинь» тощо.`, "bot");
+      document.getElementById("state").textContent = `OK · ${fragments.length} фрагментів`;
+      add(`Готово! ${fragments.length} уривків. Пиши «розкажи», «ще», «ібонаріум», «кинь уривок».`, "bot");
     }
-  } catch (err) {
-    console.error("Завантаження/парсинг помилка:", err);
-    add(`Помилка: ${err.message}<br><br>Спробуй:<br>1. Відкрий посилання вручну → <a href="${url}" target="_blank" style="color:#ffd166;">${url}</a><br>2. Якщо відкривається — проблема в браузері (CORS, розширення, VPN). Спробуй інший браузер.<br>3. Якщо 404 — файл видалено.`, "bot");
+  } catch (e) {
+    console.error(e);
+    add(`Помилка: ${e.message}<br>Перевір посилання: <a href="${url}" target="_blank" style="color:#ffd166;">${url}</a>`, "bot");
     document.getElementById("state").textContent = "ERROR";
   }
 }
 
-loadIbonarium();
+loadPDF();
 
-// CHAT
-function add(text, cls = "bot") {
-  const div = document.createElement("div");
-  div.className = `msg ${cls}`;
-  div.innerHTML = text.replace(/\n/g, "<br>");
-  const msgs = document.getElementById("msgs");
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+// ЧАТ
+function add(t, cl="bot") {
+  const d = document.createElement("div");
+  d.className=`msg ${cl}`;
+  d.innerHTML = t.replace(/\n/g,"<br>");
+  document.getElementById("msgs").appendChild(d);
+  d.scrollIntoView({behavior:"smooth"});
 }
 
 function ask() {
   const q = document.getElementById("q");
-  const val = q.value.trim();
-  if (!val) return;
-  add(val, "user");
+  const v = q.value.trim();
+  if (!v) return;
+  add(v, "user");
   q.value = "";
-  setTimeout(() => add(getResponse(val), "bot"), 500);
+  setTimeout(()=>add(getAns(v), "bot"), 400 + Math.random()*600);
 }
 
-function getResponse(q) {
+function getAns(q) {
   const low = q.toLowerCase();
   if (low.includes("ібо") || low.includes("розкажи") || low.includes("ще") || low.includes("кинь") || low.includes("урив") || low.includes("фрагмент")) {
-    if (!fragments.length) return "PDF ще не оброблено. Почекай або перезавантаж сторінку.";
-    const idx = Math.floor(Math.random() * fragments.length);
-    let frag = fragments[idx];
-    if (frag.length > 1200) frag = frag.slice(0, 1100) + "\n… (продовження)";
-    return frag;
+    if (!fragments.length) return "PDF ще обробляється або порожній. Почекай.";
+    const i = Math.floor(Math.random()*fragments.length);
+    let f = fragments[i];
+    if (f.length > 1100) f = f.slice(0,1000) + "\n… (продовження)";
+    return f;
   }
-  return "Пиши будь-яке повідомлення з «ібонаріум», «розкажи», «ще», «кинь» — видам випадковий уривок.";
+  return "Пиши «розкажи про ібонаріум», «ще», «кинь» — видам випадковий уривок з PDF.";
 }
 
-document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
+document.getElementById("q").addEventListener("keydown", e=>{if(e.key==="Enter")ask();});
 </script>
 </body>
 </html>
