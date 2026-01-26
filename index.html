@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LABORANT.AI2 · OPEN DATA ANALYTICS</title>
-
+<title>LABORANT.AI2 · OPEN DATA</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
 canvas{position:fixed;inset:0;z-index:0;}
-
 .container{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:360px 1fr;grid-template-rows:60px 1fr;gap:20px;padding:20px;}
 .header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;}
 .title{font-size:20px;letter-spacing:3px;text-shadow:0 0 20px rgba(255,209,102,.8);}
 .status-bar{display:flex;gap:20px;font-size:11px;opacity:.7;}
 .dot{width:6px;height:6px;background:#ffd166;border-radius:50%;display:inline-block;margin-right:5px;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
 .left-panel{display:flex;flex-direction:column;gap:30px;}
 .robot{width:220px;height:220px;position:relative;margin:auto;}
 .head{width:130px;height:130px;border:2px solid #ffd166;border-radius:20px;position:absolute;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,209,102,.05));box-shadow:0 0 35px rgba(255,209,102,.5);animation:float 3s ease-in-out infinite;}
@@ -27,7 +24,6 @@ canvas{position:fixed;inset:0;z-index:0;}
 .body{width:110px;height:80px;border:2px solid #ffd166;border-radius:12px;position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(255,209,102,.12);box-shadow:0 0 25px rgba(255,209,102,.4);}
 .robot-name{text-align:center;letter-spacing:2px;margin-top:10px;}
 .robot-title{text-align:center;font-size:11px;opacity:.6;}
-
 .data{font-size:11px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;height:70vh;padding-right:5px;}
 .row{display:flex;justify-content:space-between;}
 .chat{display:flex;flex-direction:column;}
@@ -81,7 +77,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
   <div class="messages" id="msgs">
     <div class="msg bot">
       Привіт! Я LABORANT.AI2.<br>
-      Збираю та аналізую відкриті наукові дані з NASA, CERN та геофізики.<br>
+      Збираю та аналізую відкриті наукові дані з NASA та геофізики.<br>
       Запитайте про космос, Сонце, поле, хвилі або сейсміку.
     </div>
   </div>
@@ -110,37 +106,26 @@ setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
 async function fetchData() {
   const dataRows=[];
   try {
-    // NASA APOD
-    const apod = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY').then(r=>r.json());
-    dataRows.push({label:'NASA APOD Title', value:apod.title});
-    dataRows.push({label:'APOD Date', value:apod.date});
-    dataRows.push({label:'APOD URL', value:apod.url});
+    // NASA APOD (CORS-friendly)
+    try{
+      const apod = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY').then(r=>r.json());
+      dataRows.push({label:'NASA APOD Title', value:apod.title});
+      dataRows.push({label:'APOD Date', value:apod.date});
+    }catch(e){dataRows.push({label:'NASA APOD', value:'ERROR'})}
 
-    // NASA Solar Flare (DONKI)
-    const today = new Date().toISOString().slice(0,10);
-    const flare = await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${today}&endDate=${today}&api_key=DEMO_KEY`).then(r=>r.json());
-    dataRows.push({label:'Solar Flares Today', value:flare.length});
+    // USGS Earthquakes (CORS-friendly)
+    try{
+      const quakes = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson').then(r=>r.json());
+      dataRows.push({label:'Earthquakes last hour', value:quakes.features.length});
+      const maxMag = quakes.features.length>0 ? Math.max(...quakes.features.map(f=>f.properties.mag)) : 0;
+      dataRows.push({label:'Largest Magnitude', value:maxMag});
+    }catch(e){dataRows.push({label:'USGS Quakes', value:'ERROR'})}
 
-    // ISS Position
-    const iss = await fetch('http://api.open-notify.org/iss-now.json').then(r=>r.json());
-    dataRows.push({label:'ISS Latitude', value:iss.iss_position.latitude});
-    dataRows.push({label:'ISS Longitude', value:iss.iss_position.longitude});
-
-    // USGS Earthquakes
-    const quakes = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson').then(r=>r.json());
-    dataRows.push({label:'Earthquakes last hour', value:quakes.features.length});
-    dataRows.push({label:'Largest Magnitude', value:Math.max(...quakes.features.map(f=>f.properties.mag))});
-
-    // Add simulated physics metrics
-    for(let i=0;i<20;i++){
+    // Simulated physics data (safe, offline)
+    for(let i=0;i<15;i++){
       dataRows.push({label:`Photon Flux ${i+1}`, value:(Math.random()*1000+100).toFixed(0)});
       dataRows.push({label:`Field Strength ${i+1}`, value:(Math.random()*50).toFixed(2)});
       dataRows.push({label:`Entropy Drift ${i+1}`, value:(Math.random()*1.5).toFixed(3)});
-    }
-
-    // CERN dummy metrics (since open JSON not directly live)
-    for(let i=0;i<5;i++){
-      dataRows.push({label:`CERN Particle Energy ${i+1} (GeV)`, value:(Math.random()*14000).toFixed(0)});
     }
 
   } catch(e){dataRows.push({label:'ERROR', value:e.message});}
@@ -174,8 +159,8 @@ function add(t,cl){
 }
 function answer(m){
   m=m.toLowerCase();
-  if(m.includes("сонц")||m.includes("solar")) return "Сонце генерує фотонний потік та спалахи. Я відображаю дані NASA Solar Flare.";
-  if(m.includes("космос")||m.includes("apod")) return "Я можу показувати щоденне зображення космосу NASA APOD та координати МКС.";
+  if(m.includes("сонц")||m.includes("solar")) return "Сонце генерує фотонний потік та спалахи. Я відображаю дані NASA Solar Flare (можливо через DEMO_KEY).";
+  if(m.includes("космос")||m.includes("apod")) return "Я можу показувати щоденне зображення космосу NASA APOD та назву дня.";
   if(m.includes("земл")||m.includes("quake")) return "Я відстежую землетруси USGS і показую найбільші магнітуди та кількість подій за годину.";
   if(m.includes("енерг")||m.includes("частин")) return "Я генерую приблизні дані частинок, фотонного потоку, поля та ентропії для симуляцій.";
   return "Я LABORANT.AI2. Запитайте про космос, Сонце, поле, хвилі або сейсміку.";
