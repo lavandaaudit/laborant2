@@ -238,7 +238,7 @@ button{
   <div class="messages" id="msgs">
     <div class="msg bot">
       вітаю. я laborant.ai2 — асистент Ібонаріуму.<br>
-      можу брати уривки з тексту та розповідати їх.<br><br>
+      можу брати уривки з PDF та розповідати їх.<br><br>
       запитайте: <br>
       • розкажи про Ібонаріум
     </div>
@@ -281,8 +281,9 @@ setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
 /* ===== CHAT & PDF ===== */
 let pdfText = [];
 
-// завантаження PDF
-async function loadPDF(url){
+// Завантаження PDF з GitHub
+async function loadPDF(){
+  const url = 'https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf';
   const pdf = await pdfjsLib.getDocument(url).promise;
   let textItems = [];
   for(let i=1;i<=pdf.numPages;i++){
@@ -291,8 +292,10 @@ async function loadPDF(url){
     content.items.forEach(item=>textItems.push(item.str));
   }
   pdfText = textItems.filter(s=>s.trim()!=="");
+  console.log("PDF завантажено. Рядків:", pdfText.length);
 }
-loadPDF('ibonarium.pdf'); // сюди встав PDF файл у корені проекту
+
+loadPDF();
 
 function ask(){
   const v=q.value.trim(); if(!v)return;
@@ -311,8 +314,7 @@ function add(t,cl){
 function answer(m){
   m=m.toLowerCase();
   if(m.includes("ібонаріум") || m.includes("розкажи")){
-    if(pdfText.length===0) return "завантаження тексту…";
-    // вибір 2-3 рандомних фрагментів
+    if(pdfText.length===0) return "завантаження PDF…";
     let res=[];
     for(let i=0;i<3;i++){
       const r = Math.floor(Math.random()*pdfText.length);
