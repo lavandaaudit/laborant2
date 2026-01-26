@@ -82,7 +82,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="msg bot">
       Привіт! Я LABORANT.AI2.<br>
       Збираю та аналізую **реальні дані** NASA та USGS.<br>
-      Можу відповідати як LLM.
+      Можу відповідати як LLM українською.
     </div>
   </div>
 
@@ -139,9 +139,9 @@ async function fetchData() {
       const maxMag = count>0 ? Math.max(...quakes.features.map(f=>f.properties.mag)) : 0;
       dataRows.push({label:'Earthquakes last hour', value:count});
       dataRows.push({label:'Largest Magnitude', value:maxMag});
-    }catch(e){dataRows.push({label:'USGS Quakes', value:'ERROR'})}
+    }catch(e){dataRows.push({label:'USGS Quakes', value:'ERROR')}
 
-  } catch(e){dataRows.push({label:'ERROR', value:e.message});}
+  }} catch(e){dataRows.push({label:'ERROR', value:e.message});}
 
   physData.innerHTML = '';
   dataRows.forEach(d=>{
@@ -157,24 +157,27 @@ fetchData(); setInterval(fetchData,15000);
 async function ask(){
   const v=q.value.trim(); if(!v)return;
   add(v,"user"); q.value="";
+
   add("Підготовка відповіді...","bot");
 
-  const inputText = v + "\nВідповідай українською, коротко, з науковою точністю.";
+  const inputText = v + "\nВідповідай українською, коротко, науково.";
   try {
-    const res = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+    const res = await fetch("https://api-inference.huggingface.co/models/TheBloke/vicuna-7B-1.1-HF", {
       method:"POST",
       headers:{
-        "Authorization":"Bearer hf_demo", // тут можна замінити на свій ключ HuggingFace
+        "Authorization":"Bearer YOUR_HF_API_KEY", // заміни на свій HuggingFace токен
         "Content-Type":"application/json"
       },
       body: JSON.stringify({inputs:inputText})
     });
     const data = await res.json();
+    let text="";
     if(data && data[0] && data[0].generated_text){
-      add(data[0].generated_text,"bot");
+      text = data[0].generated_text.replace(inputText,"");
     } else {
-      add("Помилка отримання відповіді.","bot");
+      text = "Помилка отримання відповіді.";
     }
+    add(text,"bot");
   } catch(e){
     add("Помилка LLM: "+e.message,"bot");
   }
