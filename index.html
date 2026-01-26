@@ -4,91 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM ASSISTANT</title>
-
 <style>
-body{
-  margin:0;
-  padding:0;
-  font-family:"Courier New",monospace;
-  background:#000;
-  color:#ffd166;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  overflow:hidden;
-}
-
-.container{
-  width:500px;
-  max-width:90%;
-  height:600px;
-  display:flex;
-  flex-direction:column;
-  background:rgba(0,0,0,.9);
-  border:1px solid #ffd166;
-  padding:20px;
-  box-sizing:border-box;
-  border-radius:10px;
-}
-
-.header{
-  text-align:center;
-  margin-bottom:10px;
-  font-size:20px;
-  letter-spacing:2px;
-  text-shadow:0 0 10px #ffd166;
-}
-
-.messages{
-  flex:1;
-  overflow-y:auto;
-  border:1px solid #ffd166;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:5px;
-}
-
-.msg{
-  margin-bottom:12px;
-}
-
+body{margin:0;padding:0;font-family:"Courier New",monospace;background:#000;color:#ffd166;display:flex;justify-content:center;align-items:center;height:100vh;}
+.container{width:500px;max-width:90%;height:600px;display:flex;flex-direction:column;background:rgba(0,0,0,.9);border:1px solid #ffd166;padding:20px;box-sizing:border-box;border-radius:10px;}
+.header{text-align:center;margin-bottom:10px;font-size:20px;letter-spacing:2px;text-shadow:0 0 10px #ffd166;}
+.messages{flex:1;overflow-y:auto;border:1px solid #ffd166;padding:10px;margin-bottom:10px;border-radius:5px;}
+.msg{margin-bottom:12px;}
 .user{text-align:right;color:#ffe8a3}
 .bot{color:#ffd166}
-
-.input-box{
-  display:flex;
-  gap:10px;
-}
-
-input{
-  flex:1;
-  padding:10px;
-  border:1px solid #ffd166;
-  background:rgba(0,0,0,.5);
-  color:#ffd166;
-  border-radius:5px;
-}
-
-button{
-  padding:10px 15px;
-  border:1px solid #ffd166;
-  background:rgba(255,209,102,.2);
-  color:#ffd166;
-  cursor:pointer;
-  border-radius:5px;
-}
+.input-box{display:flex;gap:10px;}
+input{flex:1;padding:10px;border:1px solid #ffd166;background:rgba(0,0,0,.5);color:#ffd166;border-radius:5px;}
+button{padding:10px 15px;border:1px solid #ffd166;background:rgba(255,209,102,.2);color:#ffd166;cursor:pointer;border-radius:5px;}
 </style>
 </head>
-
 <body>
 <div class="container">
   <div class="header">LABORANT.AI2 · IBONARIUM</div>
   <div class="messages" id="msgs">
-    <div class="msg bot">
-      Вітаю! Я laborant.ai2 — асистент Ібонаріуму.<br>
-      Запитайте мене про Ібонаріум, і я покажу уривки з PDF.
-    </div>
+    <div class="msg bot">Вітаю! Я laborant.ai2 — асистент Ібонаріуму.<br>Запитайте мене про Ібонаріум, і я покажу уривки з PDF.</div>
   </div>
   <div class="input-box">
     <input id="q" placeholder="Ваше питання…">
@@ -96,29 +29,32 @@ button{
   </div>
 </div>
 
-<!-- PDF.js бібліотека -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.313/pdf.min.js"></script>
 <script>
+// ===== PDF у Base64 =====
+// ТУТ вставте свій PDF у base64 (для невеликих файлів)
+const pdfBase64 = "JVBERi0xLjQKJcTl8uXr...."; // обрізано для прикладу
+
 let pdfText = [];
 
-// Завантаження PDF з GitHub
-async function loadPDF(){
-  const url = 'https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf';
-  const pdf = await pdfjsLib.getDocument(url).promise;
-  let textItems = [];
-  for(let i=1;i<=pdf.numPages;i++){
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    content.items.forEach(item=>{
-      if(item.str.trim()!=="") textItems.push(item.str.trim());
-    });
-  }
-  pdfText = textItems;
-  console.log("PDF завантажено. Рядків:", pdfText.length);
+async function loadPDFBase64(base64){
+    const pdfData = atob(base64);
+    const pdf = await pdfjsLib.getDocument({data:pdfData}).promise;
+    let textItems = [];
+    for(let i=1;i<=pdf.numPages;i++){
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        content.items.forEach(item=>{
+            if(item.str.trim()!=="") textItems.push(item.str.trim());
+        });
+    }
+    pdfText = textItems;
+    console.log("PDF завантажено. Рядків:", pdfText.length);
 }
 
-loadPDF();
+loadPDFBase64(pdfBase64);
 
+// ===== CHAT =====
 function ask(){
   const v = document.getElementById('q').value.trim();
   if(!v) return;
@@ -139,8 +75,7 @@ function add(text,cls){
 function answer(m){
   m = m.toLowerCase();
   if(m.includes("ібонаріум") || m.includes("розкажи")){
-    if(pdfText.length===0) return "Завантаження PDF…";
-    // Вибираємо 2-4 рандомні уривки
+    if(pdfText.length===0) return "PDF ще завантажується…";
     let res = [];
     const count = Math.floor(Math.random()*3)+2;
     for(let i=0;i<count;i++){
@@ -152,7 +87,6 @@ function answer(m){
   return "Я асистент Ібонаріуму. Спробуйте запитати про Ібонаріум.";
 }
 
-// Відправка по Enter
 document.getElementById('q').addEventListener('keydown', e=>{
   if(e.key==='Enter') ask();
 });
