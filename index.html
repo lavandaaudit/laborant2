@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LABORANT.AI2 · OPEN DATA</title>
+<title>LABORANT.AI2 · REAL DATA ANALYTICS</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
@@ -26,6 +27,10 @@ canvas{position:fixed;inset:0;z-index:0;}
 .robot-title{text-align:center;font-size:11px;opacity:.6;}
 .data{font-size:11px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;height:70vh;padding-right:5px;}
 .row{display:flex;justify-content:space-between;}
+.alert{font-weight:bold;}
+.green{color:#00ff00;}
+.yellow{color:#ffff00;}
+.red{color:#ff3333;}
 .chat{display:flex;flex-direction:column;}
 .chat-title{text-align:center;margin-bottom:10px;opacity:.7;}
 .messages{flex:1;overflow-y:auto;padding-right:10px;}
@@ -45,7 +50,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
 <div class="container">
 
 <div class="header">
-  <div class="title">LABORANT.AI2 · OPEN DATA</div>
+  <div class="title">LABORANT.AI2 · REAL DATA</div>
   <div class="status-bar">
     <span><span class="dot"></span>ONLINE</span>
     <span id="time"></span>
@@ -64,7 +69,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
       <div class="body"></div>
     </div>
     <div class="robot-name">LABORANT.AI2</div>
-    <div class="robot-title">open data analyst v1.0</div>
+    <div class="robot-title">real data analyst v1.0</div>
   </div>
 
   <div class="data" id="physData">
@@ -77,8 +82,8 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
   <div class="messages" id="msgs">
     <div class="msg bot">
       Привіт! Я LABORANT.AI2.<br>
-      Збираю та аналізую відкриті наукові дані з NASA та геофізики.<br>
-      Запитайте про космос, Сонце, поле, хвилі або сейсміку.
+      Збираю та аналізую **реальні дані** NASA та USGS.<br>
+      Запитайте про космос, Сонце або землетруси.
     </div>
   </div>
 
@@ -102,39 +107,48 @@ draw();
 // ===== TIME =====
 setInterval(()=>time.textContent=new Date().toLocaleTimeString("uk-UA"),1000);
 
-// ===== FETCH OPEN DATA =====
+// ===== ANALYTICS HELPER =====
+function colorize(label,value){
+  if(label.includes("Magnitude")){
+    if(value>=5) return 'red';
+    if(value>=3) return 'yellow';
+    return 'green';
+  }
+  if(label.includes("Flares")) {
+    if(value>=3) return 'red';
+    if(value>=1) return 'yellow';
+    return 'green';
+  }
+  return 'green';
+}
+
+// ===== FETCH REAL DATA =====
 async function fetchData() {
   const dataRows=[];
   try {
-    // NASA APOD (CORS-friendly)
+    // NASA APOD
     try{
       const apod = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY').then(r=>r.json());
       dataRows.push({label:'NASA APOD Title', value:apod.title});
       dataRows.push({label:'APOD Date', value:apod.date});
     }catch(e){dataRows.push({label:'NASA APOD', value:'ERROR'})}
 
-    // USGS Earthquakes (CORS-friendly)
+    // USGS Earthquakes last hour
     try{
       const quakes = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson').then(r=>r.json());
-      dataRows.push({label:'Earthquakes last hour', value:quakes.features.length});
-      const maxMag = quakes.features.length>0 ? Math.max(...quakes.features.map(f=>f.properties.mag)) : 0;
+      const count = quakes.features.length;
+      const maxMag = count>0 ? Math.max(...quakes.features.map(f=>f.properties.mag)) : 0;
+      dataRows.push({label:'Earthquakes last hour', value:count});
       dataRows.push({label:'Largest Magnitude', value:maxMag});
     }catch(e){dataRows.push({label:'USGS Quakes', value:'ERROR'})}
 
-    // Simulated physics data (safe, offline)
-    for(let i=0;i<15;i++){
-      dataRows.push({label:`Photon Flux ${i+1}`, value:(Math.random()*1000+100).toFixed(0)});
-      dataRows.push({label:`Field Strength ${i+1}`, value:(Math.random()*50).toFixed(2)});
-      dataRows.push({label:`Entropy Drift ${i+1}`, value:(Math.random()*1.5).toFixed(3)});
-    }
-
   } catch(e){dataRows.push({label:'ERROR', value:e.message});}
 
-  // update panel
+  // update panel with colors
   physData.innerHTML = '';
   dataRows.forEach(d=>{
     const div=document.createElement('div');
-    div.className='row';
+    div.className='row alert '+colorize(d.label,d.value);
     div.innerHTML=`<span>${d.label}</span><span>${d.value}</span>`;
     physData.appendChild(div);
   });
@@ -159,11 +173,10 @@ function add(t,cl){
 }
 function answer(m){
   m=m.toLowerCase();
-  if(m.includes("сонц")||m.includes("solar")) return "Сонце генерує фотонний потік та спалахи. Я відображаю дані NASA Solar Flare (можливо через DEMO_KEY).";
-  if(m.includes("космос")||m.includes("apod")) return "Я можу показувати щоденне зображення космосу NASA APOD та назву дня.";
-  if(m.includes("земл")||m.includes("quake")) return "Я відстежую землетруси USGS і показую найбільші магнітуди та кількість подій за годину.";
-  if(m.includes("енерг")||m.includes("частин")) return "Я генерую приблизні дані частинок, фотонного потоку, поля та ентропії для симуляцій.";
-  return "Я LABORANT.AI2. Запитайте про космос, Сонце, поле, хвилі або сейсміку.";
+  if(m.includes("сонц")||m.includes("solar")) return "Сонце генерує фотонний потік та спалахи. Можу показувати їх кількість та стан.";
+  if(m.includes("космос")||m.includes("apod")) return "Я показую щоденне зображення космосу NASA APOD та назву дня.";
+  if(m.includes("земл")||m.includes("quake")) return "Я відстежую землетруси USGS і підсвічую їх зелено-жовто-червоним залежно від магнітуди.";
+  return "Я LABORANT.AI2. Запитайте про космос, Сонце або землетруси.";
 }
 q.addEventListener("keydown",e=>e.key==="Enter"&&ask());
 </script>
