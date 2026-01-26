@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.min.js"></script> <!-- класична версія, без module, бо простіше -->
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -64,7 +64,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
         <div class="body"></div>
       </div>
       <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-title">ibonarium fragmentor v1.2</div>
+      <div class="robot-title">ibonarium fragmentor v1.3</div>
     </div>
   </div>
 
@@ -73,19 +73,19 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="messages" id="msgs">
       <div class="msg bot">
         вітаю. я laborant.ai2 — видавач уривків ібонаріуму.<br>
-        зараз завантажую текст з GitHub...<br>
-        зачекай 3–10 секунд
+        зараз завантажую <b>1.pdf.pdf</b> з GitHub...<br>
+        зачекай 5–15 секунд
       </div>
     </div>
 
     <div class="input-box">
-      <input id="q" placeholder="розкажи про ібонаріум / ще / уривок">
+      <input id="q" placeholder="розкажи про ібонаріум / ще / уривок / кинь">
       <button onclick="ask()">→</button>
     </div>
   </div>
 </div>
 
-<script type="module">
+<script>
 // BACKGROUND
 const c = document.getElementById("bg"), ctx = c.getContext("2d");
 let W, H, particles = [];
@@ -94,7 +94,7 @@ function resize() {
   H = c.height = innerHeight;
   particles = Array.from({length:120}, ()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));
 }
-resize(); addEventListener("resize", resize);
+resize(); window.addEventListener("resize", resize);
 
 function drawBg() {
   ctx.fillStyle = "#000"; ctx.fillRect(0,0,W,H);
@@ -113,88 +113,91 @@ drawBg();
 // TIME
 setInterval(() => document.getElementById("time").textContent = new Date().toLocaleTimeString("uk-UA"), 1000);
 
-// PDF & TEXT
-import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs";
-pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs";
+// PDF.js (не модульна версія для простоти)
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.worker.min.js';
 
 let fragments = [];
 
 async function loadIbonarium() {
-  const url = "https://github.com/lavandaaudit/laborant2/raw/main/1.pdf.pdf";
-  add("Завантажую 1.pdf.pdf з GitHub...", "bot");
+  const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf";
+  add("Завантажую PDF з raw.githubusercontent.com...", "bot");
 
   try {
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status} — можливо файл видалено або приватний`);
-    
-    const data = await resp.arrayBuffer();
-    const pdf = await pdfjs.getDocument({data}).promise;
-    
-    let text = "";
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const cont = await page.getTextContent();
-      cont.items.forEach(item => {
-        text += item.str;
-        if (item.hasEOL) text += "\n";
-      });
-      text += "\n\n";
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} — файл не знайдено або доступ заборонено`);
     }
 
-    fragments = text
+    const arrayBuffer = await response.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+
+    let fullText = "";
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      let pageText = "";
+      content.items.forEach(item => {
+        pageText += item.str;
+        if (item.hasEOL) pageText += "\n";
+      });
+      fullText += pageText + "\n\n";
+    }
+
+    fragments = fullText
       .split(/\n\s*\n+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 30);
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.length > 40); // мінімум символів для змістовності
 
     if (fragments.length === 0) {
-      add("Текст витягнуто, але немає змістовних уривків (можливо тільки заголовки/таблиці).", "bot");
+      add("PDF завантажено, але текст не знайдено (можливо сканований PDF без selectable text).", "bot");
     } else {
       document.getElementById("state").textContent = `FRAGMENTS: ${fragments.length}`;
-      add(`Готово. ${fragments.length} уривків. Пиши: ще / розкажи / ібонаріум`, "bot");
+      add(`Готово! Знайдено ${fragments.length} уривків. Пиши «розкажи», «ще», «кинь», «ібонаріум»`, "bot");
     }
-  } catch (e) {
-    console.error(e);
-    add("Не вдалося завантажити або розпарсити PDF:<br>" + e.message + "<br>Перевір посилання:<br>https://github.com/lavandaaudit/laborant2/raw/main/1.pdf.pdf", "bot");
+  } catch (err) {
+    console.error("Помилка:", err);
+    add(`Не вдалося завантажити PDF:<br><b>${err.message}</b><br>Перевір посилання вручну:<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити PDF</a>`, "bot");
     document.getElementById("state").textContent = "ERROR";
   }
 }
 
-loadIbonarium(); // auto start
+loadIbonarium(); // запускаємо автоматично
 
 // CHAT
-function add(msg, cls = "bot") {
+function add(text, cls = "bot") {
   const div = document.createElement("div");
   div.className = `msg ${cls}`;
-  div.innerHTML = msg.replace(/\n/g, "<br>");
-  document.getElementById("msgs").appendChild(div);
+  div.innerHTML = text.replace(/\n/g, "<br>");
+  const msgs = document.getElementById("msgs");
+  msgs.appendChild(div);
   div.scrollIntoView({behavior: "smooth"});
 }
 
 function ask() {
   const input = document.getElementById("q");
-  const text = input.value.trim();
-  if (!text) return;
-  
-  add(text, "user");
+  const val = input.value.trim();
+  if (!val) return;
+  add(val, "user");
   input.value = "";
-  
   setTimeout(() => {
-    add(getResponse(text), "bot");
-  }, 400 + Math.random() * 600);
+    add(getResponse(val), "bot");
+  }, 300 + Math.random() * 700);
 }
 
-function getResponse(q) {
-  const low = q.toLowerCase();
-  if (low.includes("ібо") || low.includes("розкажи") || low.includes("ще") || low.includes("урив") || low.includes("фрагмент") || low.includes("кинь")) {
+function getResponse(query) {
+  const q = query.toLowerCase();
+  if (q.includes("ібо") || q.includes("розкажи") || q.includes("ще") || q.includes("урив") || q.includes("фрагмент") || q.includes("кинь") || q === "") {
     if (fragments.length === 0) {
-      return "Текст ще не завантажився або не містить уривків.\nСпробуй за 5–10 секунд.";
+      return "PDF ще не завантажився або порожній.\nЗачекай трохи або перевір консоль браузера (F12).";
     }
-    const idx = Math.floor(Math.random() * fragments.length);
-    let frag = fragments[idx];
-    if (frag.length > 1000) frag = frag.slice(0, 950) + "… (продовження в оригіналі)";
-    return frag;
+    const randomIdx = Math.floor(Math.random() * fragments.length);
+    let fragment = fragments[randomIdx];
+    if (fragment.length > 1100) {
+      fragment = fragment.substring(0, 1000) + "\n… (продовження в оригінальному PDF)";
+    }
+    return fragment;
   }
-  return "Просто пиши що завгодно з словом «ібонаріум», «розкажи», «ще», «уривок» — видам випадковий шматок тексту.";
+  return "Просто пиши фразу з «ібонаріум», «розкажи», «ще», «кинь уривок» — видам випадковий шматок тексту з PDF.";
 }
 
 document.getElementById("q").addEventListener("keydown", e => {
