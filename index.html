@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LABORANT.AI2 · REAL DATA ANALYTICS</title>
-
+<title>LABORANT.AI2 · REAL DATA + LLM</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
@@ -50,7 +49,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
 <div class="container">
 
 <div class="header">
-  <div class="title">LABORANT.AI2 · REAL DATA</div>
+  <div class="title">LABORANT.AI2 · REAL DATA + LLM</div>
   <div class="status-bar">
     <span><span class="dot"></span>ONLINE</span>
     <span id="time"></span>
@@ -83,7 +82,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="msg bot">
       Привіт! Я LABORANT.AI2.<br>
       Збираю та аналізую **реальні дані** NASA та USGS.<br>
-      Запитайте про космос, Сонце або землетруси.
+      Можу відповідати як LLM.
     </div>
   </div>
 
@@ -144,7 +143,6 @@ async function fetchData() {
 
   } catch(e){dataRows.push({label:'ERROR', value:e.message});}
 
-  // update panel with colors
   physData.innerHTML = '';
   dataRows.forEach(d=>{
     const div=document.createElement('div');
@@ -153,17 +151,35 @@ async function fetchData() {
     physData.appendChild(div);
   });
 }
+fetchData(); setInterval(fetchData,15000);
 
-// update every 15 seconds
-fetchData();
-setInterval(fetchData,15000);
-
-// ===== CHAT =====
-function ask(){
+// ===== CHAT LLM HUGGINGFACE =====
+async function ask(){
   const v=q.value.trim(); if(!v)return;
   add(v,"user"); q.value="";
-  setTimeout(()=>add(answer(v),"bot"),400);
+  add("Підготовка відповіді...","bot");
+
+  const inputText = v + "\nВідповідай українською, коротко, з науковою точністю.";
+  try {
+    const res = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer hf_demo", // тут можна замінити на свій ключ HuggingFace
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({inputs:inputText})
+    });
+    const data = await res.json();
+    if(data && data[0] && data[0].generated_text){
+      add(data[0].generated_text,"bot");
+    } else {
+      add("Помилка отримання відповіді.","bot");
+    }
+  } catch(e){
+    add("Помилка LLM: "+e.message,"bot");
+  }
 }
+
 function add(t,cl){
   const d=document.createElement("div");
   d.className="msg "+cl;
@@ -171,13 +187,7 @@ function add(t,cl){
   msgs.appendChild(d);
   msgs.scrollTop=msgs.scrollHeight;
 }
-function answer(m){
-  m=m.toLowerCase();
-  if(m.includes("сонц")||m.includes("solar")) return "Сонце генерує фотонний потік та спалахи. Можу показувати їх кількість та стан.";
-  if(m.includes("космос")||m.includes("apod")) return "Я показую щоденне зображення космосу NASA APOD та назву дня.";
-  if(m.includes("земл")||m.includes("quake")) return "Я відстежую землетруси USGS і підсвічую їх зелено-жовто-червоним залежно від магнітуди.";
-  return "Я LABORANT.AI2. Запитайте про космос, Сонце або землетруси.";
-}
+
 q.addEventListener("keydown",e=>e.key==="Enter"&&ask());
 </script>
 
