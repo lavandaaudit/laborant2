@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
@@ -27,20 +26,27 @@ canvas{position:fixed;inset:0;z-index:0;}
 .robot-title{text-align:center;font-size:11px;opacity:.6;}
 .chat{display:flex;flex-direction:column;}
 .chat-title{text-align:center;margin-bottom:10px;opacity:.7;}
-.messages{flex:1;overflow-y:auto;padding-right:10px;}
+.messages{flex:1;overflow-y:auto;padding-right:10px;scroll-behavior:smooth;}
 .msg{margin-bottom:14px;animation:fade .3s;}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
 .user{text-align:right;color:#ffe8a3}
 .bot{color:#ffd166}
-.input-box{display:flex;gap:10px;}
+.input-box{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
 input{flex:1;background:rgba(40,30,0,.4);border:1px solid rgba(255,209,102,.4);color:#ffd166;padding:10px;}
-button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;padding:10px 18px;cursor:pointer;}
+button{
+  background:rgba(255,209,102,.15);
+  border:1px solid #ffd166;
+  color:#ffd166;
+  padding:10px 16px;
+  cursor:pointer;
+  font-family:"Courier New",monospace;
+  white-space:nowrap;
+}
+button:hover{background:rgba(255,209,102,.3);}
 </style>
 </head>
 <body>
-
 <canvas id="bg"></canvas>
-
 <div class="container">
   <div class="header">
     <div class="title">LABORANT.AI2 · IBONARIUM</div>
@@ -50,7 +56,6 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
       <span id="state">ЗАВАНТАЖЕННЯ...</span>
     </div>
   </div>
-
   <div class="left-panel">
     <div>
       <div class="robot">
@@ -65,7 +70,6 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
       <div class="robot-title">ibonarium fragmentor v2.3 · TXT</div>
     </div>
   </div>
-
   <div class="chat">
     <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
     <div class="messages" id="msgs">
@@ -75,10 +79,10 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
         це текстовий файл — підгрузиться миттєво
       </div>
     </div>
-
     <div class="input-box">
-      <input id="q" placeholder="розкажи / ще / кинь / ібонаріум" autocomplete="off">
-      <button onclick="ask()">→</button>
+      <button onclick="tell()">Розкажи про Ібонаріум</button>
+      <button onclick="tell()">Цікаво</button>
+      <button onclick="tell()">Що ще знаєте?</button>
     </div>
   </div>
 </div>
@@ -100,17 +104,14 @@ let fragments = [];
 
 async function loadTxt() {
   const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/tet.txt";
-
   add("Завантажую tet.txt...", "bot");
-
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status} — файл не знайдено`);
     const text = await res.text();
-
     add(`Отримано ${ (text.length / 1024).toFixed(1) } KB тексту`, "bot");
 
-    // Розбиваємо на уривки по 3+ порожніх рядках (або адаптуй під свій формат)
+    // Розбиваємо на уривки по 3+ порожніх рядках
     fragments = text.split(/\n{3,}/)
       .map(s => s.trim())
       .filter(s => s.length > 60);
@@ -120,12 +121,11 @@ async function loadTxt() {
       document.getElementById("state").textContent = "НЕМАЄ УРИВКІВ";
     } else {
       document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
-      add(`Готово! Знайдено ${fragments.length} уривків.<br>Пиши: розкажи / ще / кинь / ібонаріум`, "bot");
+      add(`Готово! Знайдено ${fragments.length} уривків.<br>Натискай кнопки внизу`, "bot");
     }
-
   } catch (err) {
     console.error(err);
-    add(`Помилка: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити tet.txt вручну</a><br>Перевір F12 → Console/Network`, "bot");
+    add(`Помилка: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити tet.txt вручну</a>`, "bot");
     document.getElementById("state").textContent = "ПОМИЛКА";
   }
 }
@@ -137,35 +137,21 @@ function add(text, cls = "bot") {
   div.innerHTML = text.replace(/\n/g, "<br>");
   const msgs = document.getElementById("msgs");
   msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  // плавний скрол донизу
+  msgs.scrollTo({ top: msgs.scrollHeight, behavior: "smooth" });
 }
 
-function ask() {
-  const input = document.getElementById("q");
-  const val = input.value.trim();
-  if (!val) return;
-  add(val, "user");
-  input.value = "";
-  setTimeout(() => add(getResponse(val), "bot"), 400 + Math.random() * 700);
-}
-
-function getResponse(query) {
-  const q = query.toLowerCase();
-  const triggers = ["розкажи", "ще", "кинь", "ібонаріум", "урив", "фрагмент", "ібо"];
-  if (triggers.some(t => q.includes(t))) {
-    if (fragments.length === 0) return "Файл ще не завантажився або немає уривків. Зачекай / перевір консоль.";
-    const idx = Math.floor(Math.random() * fragments.length);
-    let frag = fragments[idx];
-    if (frag.length > 1200) frag = frag.slice(0, 1100) + "\n… (скорочено)";
-    return frag;
+function tell() {
+  if (fragments.length === 0) {
+    add("Файл ще не завантажився або немає уривків. Зачекай трохи.", "bot");
+    return;
   }
-  return "Пиши фразу з: розкажи, ще, кинь, ібонаріум";
+  const idx = Math.floor(Math.random() * fragments.length);
+  const frag = fragments[idx];  // без скорочення
+  setTimeout(() => add(frag, "bot"), 300 + Math.random() * 800);
 }
 
-document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
-
-// Запуск
-loadTxt();
+document.addEventListener("DOMContentLoaded", loadTxt);
 </script>
 </body>
 </html>
