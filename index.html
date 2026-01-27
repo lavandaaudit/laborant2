@@ -75,7 +75,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
       <div class="msg bot">
         вітаю, Романе.<br>
         я laborant.ai2 — видавач уривків ібонаріуму<br><br>
-        зараз завантажую 1.pdf.pdf з GitHub...<br>
+        зараз завантажую 2.pdf.pdf з GitHub...<br>
         зачекай 5–20 секунд
       </div>
     </div>
@@ -140,7 +140,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dis
 let fragments = [];
 
 async function loadPDF() {
-  const url = "https://github.com/lavandaaudit/laborant2/raw/main/1.pdf.pdf";
+  const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/2.pdf.pdf";
 
   add("починаю завантаження з GitHub...", "bot");
 
@@ -170,7 +170,7 @@ async function loadPDF() {
       .filter(s => s.length > 60);
 
     if (fragments.length === 0) {
-      add("не вдалося знайти уривки довші 60 символів", "bot");
+      add("не вдалося знайти уривки довші 60 символів. Можливо, PDF сканований — текст не витягується. Спробуй додати OCR (Tesseract.js).", "bot");
       document.getElementById("state").textContent = "немає тексту";
     } else {
       document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
