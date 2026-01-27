@@ -18,7 +18,7 @@
     position:relative; z-index:2;
     height:100vh;
     display:grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 300px 1fr;
     grid-template-rows: 54px 1fr;
     gap:16px;
     padding:16px;
@@ -74,27 +74,33 @@
   .robot-title { font-size:10px; opacity:.65; text-align:center; }
 
   .chat {
-    display:flex; flex-direction:column; height:100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
   }
   .chat-title {
     text-align:center; margin-bottom:8px; opacity:.8; font-size:13px;
   }
 
   .messages {
-    flex:1;
-    overflow-y:auto;
-    padding:0 10px 10px;
-    scrollbar-width:thin;
-    scrollbar-color:#ffd166 #1a1a1a;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 10px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: #ffd166 #1a1a1a;
+    -webkit-overflow-scrolling: touch;
   }
-  .messages::-webkit-scrollbar { width:6px; }
-  .messages::-webkit-scrollbar-track { background:#111; }
-  .messages::-webkit-scrollbar-thumb { background:#ffd166; border-radius:3px; }
+  .messages::-webkit-scrollbar { width: 7px; }
+  .messages::-webkit-scrollbar-track { background: #0d0d0d; border-radius: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: #ffd166; border-radius: 4px; }
+  .messages::-webkit-scrollbar-thumb:hover { background: #ffdb80; }
 
   .msg {
-    margin:10px 0;
-    line-height:1.45;
-    animation:fade 0.35s;
+    margin: 10px 0;
+    line-height: 1.45;
+    animation: fade 0.35s;
   }
   @keyframes fade { from {opacity:0; transform:translateY(7px)} to {opacity:1} }
 
@@ -122,6 +128,7 @@
   .quick-buttons {
     display:flex; gap:10px; flex-wrap:wrap;
     justify-content:center;
+    width:100%;
   }
 </style>
 </head>
@@ -220,9 +227,14 @@ function add(text, cls = "bot") {
   const div = document.createElement("div");
   div.className = `msg ${cls}`;
   div.innerHTML = text.replace(/\n/g, "<br>");
+
   const msgs = document.getElementById("msgs");
   msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+
+  // Надійний скрол донизу
+  setTimeout(() => {
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 60);
 }
 
 function tell() {
@@ -232,7 +244,7 @@ function tell() {
   }
   const idx = Math.floor(Math.random() * fragments.length);
   const frag = fragments[idx];
-  // без скорочення — виводимо весь уривок
+  // Виводимо весь уривок без скорочення
   setTimeout(() => add(frag, "bot"), 500 + Math.random() * 700);
 }
 
