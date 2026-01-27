@@ -1,349 +1,52 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LABORANT.AI2 · IBONARIUM</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html, body {
-    width:100%; height:100%;
-    background:#000; color:#ffd166;
-    font-family:"Courier New",monospace;
-    overflow:hidden;
-  }
-  canvas { position:fixed; inset:0; z-index:0; }
+  <meta charset="UTF-8">
+  <title>IBONARIUM · STACK · 2026</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      overflow-y: auto;
+    }
 
-  .container {
-    position:relative; z-index:2;
-    height:100vh;
-    max-width: 960px;
-    margin: 0 auto;
-    display:grid;
-    grid-template-columns: 250px 1fr;
-    grid-template-rows: 45px 1fr;
-    gap:10px;
-    padding:10px;
-  }
+    /* один екран = одна сторінка */
+    .section {
+      width: 100%;
+      height: 100vh;
+      border: none;
+      display: block;
+      background: #000;
+    }
 
-  .header {
-    grid-column: 1 / -1;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  }
-  .title { font-size:15px; letter-spacing:1.8px; text-shadow:0 0 14px rgba(255,209,102,.7); }
-  .status-bar {
-    display:flex; gap:10px; font-size:9px; opacity:.8;
-  }
-  .dot {
-    width:5px; height:5px; background:#ffd166; border-radius:50%;
-    display:inline-block; margin-right:4px;
-    animation:pulse 1.6s infinite;
-  }
-  @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:.4} }
-
-  .left-panel {
-    display:flex; flex-direction:column; align-items:center; gap:16px;
-  }
-
-  .robot {
-    width:160px; height:160px; position:relative;
-  }
-  .head {
-    width:98px; height:98px;
-    border:2px solid #ffd166; border-radius:14px;
-    position:absolute; left:50%; top:0;
-    transform:translateX(-50%);
-    background:linear-gradient(135deg,rgba(255,209,102,.3),rgba(255,209,102,.08));
-    box-shadow:0 0 24px rgba(255,209,102,.45);
-    animation:float 3s ease-in-out infinite;
-  }
-  @keyframes float { 0%,100% {transform:translate(-50%,0)} 50% {transform:translate(-50%,-9px)} }
-
-  .eye { width:20px; height:20px; background:#ffd166; border-radius:50%;
-    position:absolute; top:27px; box-shadow:0 0 16px #ffd166; }
-  .eye.l { left:22px; } .eye.r { right:22px; }
-
-  .mouth { width:46px; height:2px; background:#ffd166;
-    position:absolute; bottom:23px; left:50%; transform:translateX(-50%); }
-
-  .body { width:82px; height:60px; border:2px solid #ffd166; border-radius:9px;
-    position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-    background:rgba(255,209,102,.15); box-shadow:0 0 18px rgba(255,209,102,.4); }
-
-  .robot-name { text-align:center; letter-spacing:1.4px; margin-top:7px; font-size:12px; }
-  .robot-desc {
-    text-align:center;
-    font-size:9px;
-    opacity:0.65;
-    line-height:1.3;
-    margin-top:4px;
-    letter-spacing:0.5px;
-  }
-  .robot-title { font-size:8px; opacity:.7; text-align:center; margin-top:2px; }
-
-  .projects {
-    margin-top: 16px;
-    width: 100%;
-    text-align: center;
-  }
-  .projects h4 {
-    font-size: 10px;
-    opacity: 0.7;
-    margin-bottom: 8px;
-  }
-  .projects a {
-    display: block;
-    color: #ffd166;
-    text-decoration: none;
-    font-size: 11px;
-    padding: 4px 0;
-    opacity: 0.9;
-    transition: all 0.2s;
-  }
-  .projects a:hover {
-    opacity: 1;
-    text-shadow: 0 0 8px rgba(255,209,102,0.6);
-    transform: translateY(-1px);
-  }
-
-  .chat {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,209,102,0.18);
-    border-radius: 5px;
-    overflow: hidden;
-  }
-
-  .chat-title {
-    text-align:center; padding:6px 0; opacity:.85; font-size:11px;
-    border-bottom: 1px solid rgba(255,209,102,0.15);
-    background: rgba(255,209,102,0.04);
-  }
-
-  .messages {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 8px 10px;
-    font-size: 12px;
-    line-height: 1.45;
-    scrollbar-width: thin;
-    scrollbar-color: #ffd166 #111;
-  }
-  .messages::-webkit-scrollbar { width: 5px; }
-  .messages::-webkit-scrollbar-track { background: #0a0a0a; }
-  .messages::-webkit-scrollbar-thumb { background: #ffd166; border-radius: 3px; }
-  .messages::-webkit-scrollbar-thumb:hover { background: #ffdb80; }
-
-  .msg {
-    margin: 6px 0;
-    padding: 5px 9px;
-    border-radius: 4px;
-    max-width: 94%;
-    word-wrap: break-word;
-  }
-
-  .bot {
-    color: #ffd166;
-    background: rgba(255,209,102,0.08);
-    align-self: flex-start;
-  }
-
-  .user {
-    color: #aaffaa;
-    background: rgba(170,255,170,0.12);
-    align-self: flex-end;
-    text-align: right;
-  }
-
-  .input-box {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px 10px;
-    border-top: 1px solid rgba(255,209,102,0.2);
-    background: rgba(0,0,0,0.5);
-  }
-
-  .quick-buttons {
-    display: flex;
-    gap: 7px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  button {
-    background: rgba(255,209,102,0.2);
-    border: 1px solid #ffd166;
-    color: #ffd166;
-    padding: 7px 12px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 11px;
-    white-space: nowrap;
-    border-radius: 4px;
-    transition: all 0.16s;
-  }
-  button:hover {
-    background: rgba(255,209,102,0.35);
-    box-shadow: 0 0 7px rgba(255,209,102,0.4);
-  }
-</style>
+    iframe {
+      display: block;
+      border: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="bg"></canvas>
+<!-- 1 -->
+<iframe
+  class="section"
+  src="https://github.com/lavandaaudit/txtLaborant2"
+  loading="lazy"
+  allowfullscreen
+></iframe>
 
-<div class="container">
-  <div class="header">
-    <div class="title">LABORANT.AI2 · IBONARIUM</div>
-    <div class="status-bar">
-      <span><span class="dot"></span>ONLINE</span>
-      <span id="time"></span>
-      <span id="state">ЗАВАНТАЖЕННЯ...</span>
-    </div>
-  </div>
+<!-- 2 -->
+<iframe
+  class="section"
+  src="https://lavandaaudit.github.io/new13/"
+  loading="lazy"
+  allowfullscreen
+></iframe>
 
-  <div class="left-panel">
-    <div>
-      <div class="robot">
-        <div class="head">
-          <div class="eye l"></div>
-          <div class="eye r"></div>
-          <div class="mouth"></div>
-        </div>
-        <div class="body"></div>
-      </div>
-      <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-desc">
-        Теоретик кафедри ібонаріуму<br>
-        лектор теорії<br>
-        асистент по проєктам лютого 2026
-      </div>
-      <div class="robot-title">ibonarium fragmentor v2.7 · TXT</div>
-
-      <div class="projects">
-        <h4>ПРОЄКТИ</h4>
-        <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0201</a>
-        <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0202</a>
-        <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0203</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="chat">
-    <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
-
-    <div class="messages" id="msgs">
-      <div class="msg bot">
-        вітаю, Романе.<br>
-        завантажую tet.txt з GitHub...
-      </div>
-    </div>
-
-    <div class="input-box">
-      <div class="quick-buttons">
-        <button onclick="tell()">розкажи</button>
-        <button onclick="tell()">цікаво</button>
-        <button onclick="tell()">ще</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ФОН — зірки
-const c = document.getElementById("bg");
-const ctx = c.getContext("2d");
-let W, H, particles = [];
-function resize(){W=c.width=innerWidth;H=c.height=innerHeight;particles=Array.from({length:140},()=> ({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W+1}));}
-resize();addEventListener("resize",resize);
-function drawBg(){ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd166";particles.forEach(p=>{p.z-=0.6;if(p.z<1)p.z=W;const k=140/p.z;const x=(p.x-W/2)*k+W/2;const y=(p.y-H/2)*k+H/2;if(x>0&&y>0&&x<W&&y<H)ctx.fillRect(x,y,1.6,1.6);});requestAnimationFrame(drawBg);}
-drawBg();
-
-// ЧАС
-setInterval(()=>document.getElementById("time").textContent=new Date().toLocaleTimeString("uk-UA"),1000);
-
-let fragments = [];
-
-async function loadTxt() {
-  const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/tet.txt";
-  add("Завантажую tet.txt...", "bot");
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    add(`Отримано ${ (text.length / 1024).toFixed(1) } KB`, "bot");
-
-    fragments = text.split(/\n{2,}/)
-      .map(s => s.trim())
-      .filter(s => s.length > 50 && !s.startsWith('#'));
-
-    if (fragments.length === 0) {
-      add("УВАГА: уривків не знайдено.<br>Можливо, файл без достатніх розривів.", "bot");
-      document.getElementById("state").textContent = "OK, АЛЕ БЕЗ УРИВКІВ";
-      if (text.trim().length > 200) fragments = [text.trim()];
-    } else {
-      document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
-      add(`Готово! ${fragments.length} уривків.<br>Натискай будь-яку кнопку`, "bot");
-    }
-  } catch (err) {
-    add(`ПОМИЛКА: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">відкрити tet.txt</a>`, "bot");
-    document.getElementById("state").textContent = "ПОМИЛКА";
-  }
-}
-
-function add(text, cls = "bot") {
-  const div = document.createElement("div");
-  div.className = `msg ${cls}`;
-  div.innerHTML = text.replace(/\n/g, "<br>");
-
-  const msgs = document.getElementById("msgs");
-  msgs.appendChild(div);
-
-  setTimeout(() => {
-    msgs.scrollTop = msgs.scrollHeight;
-  }, 60);
-}
-
-function getRandomSentences(fragment) {
-  const sentences = fragment
-    .split(/(?<=[.!?])\s+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 10);
-
-  if (sentences.length === 0) return fragment;
-  if (sentences.length === 1) return sentences[0];
-
-  const count = Math.random() < 0.6 ? 1 : 2;
-  const start = Math.floor(Math.random() * (sentences.length - count + 1));
-  const selected = sentences.slice(start, start + count);
-
-  return selected.join(" ");
-}
-
-function tell() {
-  if (fragments.length === 0) {
-    add("Ще немає уривків — зачекай завантаження.", "bot");
-    return;
-  }
-
-  const buttonText = event.target.innerText;
-  add(buttonText, "user");
-
-  const idx = Math.floor(Math.random() * fragments.length);
-  const fullFrag = fragments[idx];
-  const shortFrag = getRandomSentences(fullFrag);
-
-  setTimeout(() => add(shortFrag, "bot"), 600 + Math.random() * 800);
-}
-
-document.addEventListener("DOMContentLoaded", loadTxt);
-</script>
 </body>
 </html>
