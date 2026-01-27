@@ -18,10 +18,10 @@
     position:relative; z-index:2;
     height:100vh;
     display:grid;
-    grid-template-columns: 300px 1fr;
-    grid-template-rows: 54px 1fr;
-    gap:16px;
-    padding:16px;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: 50px 1fr;
+    gap:12px;
+    padding:12px;
   }
 
   .header {
@@ -30,105 +30,133 @@
     justify-content:space-between;
     align-items:center;
   }
-  .title { font-size:19px; letter-spacing:2.5px; text-shadow:0 0 18px rgba(255,209,102,.75); }
+  .title { font-size:18px; letter-spacing:2px; text-shadow:0 0 16px rgba(255,209,102,.7); }
   .status-bar {
-    display:flex; gap:14px; font-size:11px; opacity:.75;
+    display:flex; gap:12px; font-size:10px; opacity:.8;
   }
   .dot {
     width:6px; height:6px; background:#ffd166; border-radius:50%;
-    display:inline-block; margin-right:5px;
+    display:inline-block; margin-right:4px;
     animation:pulse 1.6s infinite;
   }
-  @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:.35} }
+  @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:.4} }
 
   .left-panel {
-    display:flex; flex-direction:column; align-items:center; gap:24px;
+    display:flex; flex-direction:column; align-items:center; gap:20px;
   }
 
   .robot {
-    width:200px; height:200px; position:relative;
+    width:180px; height:180px; position:relative;
   }
   .head {
-    width:120px; height:120px;
-    border:2px solid #ffd166; border-radius:18px;
+    width:110px; height:110px;
+    border:2px solid #ffd166; border-radius:16px;
     position:absolute; left:50%; top:0;
     transform:translateX(-50%);
-    background:linear-gradient(135deg,rgba(255,209,102,.28),rgba(255,209,102,.06));
-    box-shadow:0 0 32px rgba(255,209,102,.48);
-    animation:float 3.2s ease-in-out infinite;
+    background:linear-gradient(135deg,rgba(255,209,102,.3),rgba(255,209,102,.08));
+    box-shadow:0 0 28px rgba(255,209,102,.45);
+    animation:float 3s ease-in-out infinite;
   }
-  @keyframes float { 0%,100% {transform:translate(-50%,0)} 50% {transform:translate(-50%,-11px)} }
+  @keyframes float { 0%,100% {transform:translate(-50%,0)} 50% {transform:translate(-50%,-10px)} }
 
-  .eye { width:24px; height:24px; background:#ffd166; border-radius:50%;
-    position:absolute; top:32px; box-shadow:0 0 19px #ffd166; }
-  .eye.l { left:26px; } .eye.r { right:26px; }
+  .eye { width:22px; height:22px; background:#ffd166; border-radius:50%;
+    position:absolute; top:30px; box-shadow:0 0 18px #ffd166; }
+  .eye.l { left:24px; } .eye.r { right:24px; }
 
-  .mouth { width:56px; height:3px; background:#ffd166;
-    position:absolute; bottom:28px; left:50%; transform:translateX(-50%); }
+  .mouth { width:52px; height:3px; background:#ffd166;
+    position:absolute; bottom:26px; left:50%; transform:translateX(-50%); }
 
-  .body { width:100px; height:74px; border:2px solid #ffd166; border-radius:11px;
+  .body { width:92px; height:68px; border:2px solid #ffd166; border-radius:10px;
     position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-    background:rgba(255,209,102,.13); box-shadow:0 0 22px rgba(255,209,102,.38); }
+    background:rgba(255,209,102,.15); box-shadow:0 0 20px rgba(255,209,102,.4); }
 
-  .robot-name { text-align:center; letter-spacing:1.8px; margin-top:9px; }
-  .robot-title { font-size:10px; opacity:.65; text-align:center; }
+  .robot-name { text-align:center; letter-spacing:1.6px; margin-top:8px; font-size:13px; }
+  .robot-title { font-size:9px; opacity:.7; text-align:center; }
 
   .chat {
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 0;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,209,102,0.18);
+    border-radius: 6px;
+    overflow: hidden;
   }
+
   .chat-title {
-    text-align:center; margin-bottom:8px; opacity:.8; font-size:13px;
+    text-align:center; padding:8px 0; opacity:.85; font-size:12px;
+    border-bottom: 1px solid rgba(255,209,102,0.15);
+    background: rgba(255,209,102,0.04);
   }
 
   .messages {
     flex: 1 1 auto;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px 10px 16px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.5;
     scrollbar-width: thin;
-    scrollbar-color: #ffd166 #1a1a1a;
-    -webkit-overflow-scrolling: touch;
+    scrollbar-color: #ffd166 #111;
   }
-  .messages::-webkit-scrollbar { width: 7px; }
-  .messages::-webkit-scrollbar-track { background: #0d0d0d; border-radius: 4px; }
-  .messages::-webkit-scrollbar-thumb { background: #ffd166; border-radius: 4px; }
+  .messages::-webkit-scrollbar { width: 6px; }
+  .messages::-webkit-scrollbar-track { background: #0a0a0a; }
+  .messages::-webkit-scrollbar-thumb { background: #ffd166; border-radius: 3px; }
   .messages::-webkit-scrollbar-thumb:hover { background: #ffdb80; }
 
   .msg {
-    margin: 10px 0;
-    line-height: 1.45;
-    animation: fade 0.35s;
+    margin: 8px 0;
+    padding: 6px 10px;
+    border-radius: 4px;
+    max-width: 92%;
+    word-wrap: break-word;
   }
-  @keyframes fade { from {opacity:0; transform:translateY(7px)} to {opacity:1} }
 
-  .user { text-align:right; color:#ffe8a3; }
-  .bot   { color:#ffd166; }
+  .bot {
+    color: #ffd166;
+    background: rgba(255,209,102,0.08);
+    align-self: flex-start;
+  }
+
+  .user {
+    color: #aaffaa;               /* зелений для твоїх повідомлень */
+    background: rgba(170,255,170,0.12);
+    align-self: flex-end;
+    text-align: right;
+  }
 
   .input-box {
-    display:flex; gap:10px; flex-wrap:wrap;
-    margin-top:10px;
-    padding-top:10px;
-    border-top:1px solid rgba(255,209,102,.25);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(255,209,102,0.2);
+    background: rgba(0,0,0,0.5);
   }
-  button {
-    background:rgba(255,209,102,.18);
-    border:1px solid #ffd166;
-    color:#ffd166;
-    padding:9px 15px;
-    cursor:pointer;
-    font-family:inherit;
-    white-space:nowrap;
-    transition:background .18s;
-  }
-  button:hover { background:rgba(255,209,102,.32); }
 
   .quick-buttons {
-    display:flex; gap:10px; flex-wrap:wrap;
-    justify-content:center;
-    width:100%;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button {
+    background: rgba(255,209,102,0.2);
+    border: 1px solid #ffd166;
+    color: #ffd166;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    border-radius: 4px;
+    transition: all 0.16s;
+  }
+  button:hover {
+    background: rgba(255,209,102,0.35);
+    box-shadow: 0 0 8px rgba(255,209,102,0.4);
   }
 </style>
 </head>
@@ -157,7 +185,7 @@
         <div class="body"></div>
       </div>
       <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-title">ibonarium fragmentor v2.5 · TXT</div>
+      <div class="robot-title">ibonarium fragmentor v2.6 · TXT</div>
     </div>
   </div>
 
@@ -231,7 +259,6 @@ function add(text, cls = "bot") {
   const msgs = document.getElementById("msgs");
   msgs.appendChild(div);
 
-  // Надійний скрол донизу
   setTimeout(() => {
     msgs.scrollTop = msgs.scrollHeight;
   }, 60);
@@ -242,10 +269,14 @@ function tell() {
     add("Ще немає уривків — зачекай завантаження.", "bot");
     return;
   }
+
+  // Додаємо твоє "питання" зеленим перед відповіддю
+  const buttonText = event.target.innerText;
+  add(buttonText, "user");
+
   const idx = Math.floor(Math.random() * fragments.length);
   const frag = fragments[idx];
-  // Виводимо весь уривок без скорочення
-  setTimeout(() => add(frag, "bot"), 500 + Math.random() * 700);
+  setTimeout(() => add(frag, "bot"), 600 + Math.random() * 800);
 }
 
 document.addEventListener("DOMContentLoaded", loadTxt);
