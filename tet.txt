@@ -1,45 +1,344 @@
-Текст (от лат. textus — ткань; сплетение, сочетание) — зафиксированная на каком-либо материальном носителе человеческая мысль; в общем плане связная и полная последовательность символов.
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LABORANT.AI2 · IBONARIUM</title>
 
-Существуют две основные трактовки понятия «текст»: имманентная (расширенная, философски нагруженная) и репрезентативная (более частная). Имманентный подход подразумевает отношение к тексту как к автономной реальности, нацеленность на выявление его внутренней структуры. Репрезентативный — рассмотрение текста как особой формы представления информации о внешней тексту действительности.
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width:100%; height:100%;
+    background:#000; color:#ffd166;
+    font-family:"Courier New",monospace;
+    overflow:hidden;
+  }
+  canvas { position:fixed; inset:0; z-index:0; }
 
-В лингвистике термин «текст» используется в широком значении, включая и образцы устной речи. Восприятие текста изучается в рамках лингвистики текста и психолингвистики. Так, например, И. Р. Гальперин определяет текст следующим образом: «Это письменное сообщение, объективированное в виде письменного документа, состоящее из ряда высказываний, объединённых разными типами лексической, грамматической и логической связи, имеющее определённый модальный характер, прагматическую установку и соответственно литературно обработанное»[1].
+  .container {
+    position:relative; z-index:2;
+    height:100vh;
+    padding:12px;
+    display:grid;
+    gap:12px;
+  }
 
+  @media (min-width: 768px) {
+    .container {
+      grid-template-columns: 300px 1fr;
+      grid-template-rows: 50px 1fr;
+      padding:20px;
+      gap:20px;
+    }
+  }
 
-Содержание
-1	Признаки текста
-1.1	Членимость
-1.2	Смысловая цельность текста
-2	Стили и типы текста
-2.1	Функциональные стили
-2.2	По типу
-3	Примечания
-4	Литература
-Признаки текста
-Членимость
+  .header {
+    grid-column: 1 / -1;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:16px;
+  }
 
-Этот раздел нуждается в переработке. Пожалуйста, уточните проблему в разделе с помощью более конкретного шаблона.
-Пожалуйста, улучшите статью в соответствии с правилами написания статей. (11 июня 2009)
-Текст, в своем роде, состоит из некоторого количества предложений. Одно предложение, даже очень распространённое, сложное, текстом назвать нельзя, поскольку текст можно разделить на самостоятельные предложения, а части предложения сочетаются по законам синтаксиса сложного предложения, но не текста.
+  .title { font-size:18px; letter-spacing:3px; text-shadow:0 0 20px rgba(255,209,102,.8); }
 
-Главный тезис — текст состоит из двух или более предложений.
+  .status-bar {
+    display:flex;
+    gap:12px;
+    font-size:11px;
+    opacity:.8;
+  }
 
-Смысловая цельность текста
-Основные статьи: Когерентность (лингвистика) и Когезия (лингвистика)
-В смысловой цельности текста отражаются те связи и зависимости, которые имеются в самой действительности (общественные события, явления природы, человек, его внешний облик и внутренний мир, предметы неживой природы и т. д.).
+  .dot {
+    width:7px; height:7px;
+    background:#ffd166; border-radius:50%;
+    display:inline-block; margin-right:5px;
+    animation:pulse 1.8s infinite;
+  }
+  @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:.4} }
 
-Единство предмета речи — это тема высказывания. Тема — это смысловое ядро текста, конденсированное и обобщённое содержание текста.
+  .left-panel {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+  }
 
-Понятие «содержание высказывания» связано с категорией информативности речи и присуще только тексту. Оно сообщает читателю индивидуально-авторское понимание отношений между явлениями, их значимости во всех сферах придают ему смысловую цельность.
+  .robot {
+    width:180px; height:180px;
+    position:relative;
+  }
+  .head {
+    width:110px; height:110px;
+    border:2px solid #ffd166; border-radius:16px;
+    position:absolute; left:50%; top:0;
+    transform:translateX(-50%);
+    background:linear-gradient(135deg,rgba(255,209,102,.3),rgba(255,209,102,.08));
+    box-shadow:0 0 30px rgba(255,209,102,.5);
+    animation:float 3.5s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100% {transform:translate(-50%,0)} 50% {transform:translate(-50%,-10px)} }
 
-В большом тексте ведущая тема распадается на ряд составляющих подтем; подтемы членятся на более дробные, на абзацы (микротемы).
+  .eye {
+    width:22px; height:22px;
+    background:#ffd166; border-radius:50%;
+    position:absolute; top:28px;
+    box-shadow:0 0 18px #ffd166;
+  }
+  .eye.l { left:20px; }
+  .eye.r { right:20px; }
 
-Завершённость высказывания связана со смысловой цельностью текста. Показателем законченности текста является возможность подобрать к нему заголовок, отражающий его содержание.
+  .mouth {
+    width:50px; height:3px;
+    background:#ffd166;
+    position:absolute; bottom:22px; left:50%;
+    transform:translateX(-50%);
+  }
 
-Таким образом, из смысловой цельности текста вытекают следующие признаки текста:
+  .body {
+    width:90px; height:70px;
+    border:2px solid #ffd166; border-radius:10px;
+    position:absolute; bottom:0; left:50%;
+    transform:translateX(-50%);
+    background:rgba(255,209,102,.15);
+    box-shadow:0 0 20px rgba(255,209,102,.4);
+  }
 
-Текст — это высказывание на определённую тему;
-В тексте реализуется замысел говорящего, основная мысль;
-Текст любого размера — это относительно автономное (законченное) высказывание;
-Предложения логически связаны между собой;
-К тексту можно подобрать заголовок;
-Правильно оформленный текст обычно имеет начало и конец.
+  .robot-name { text-align:center; letter-spacing:1.5px; margin-top:8px; }
+  .robot-title { font-size:10px; opacity:.6; text-align:center; }
+
+  .chat {
+    display:flex; flex-direction:column;
+    height:100%;
+  }
+
+  .chat-title {
+    text-align:center;
+    margin-bottom:8px;
+    opacity:.8;
+    font-size:14px;
+  }
+
+  .messages {
+    flex:1;
+    overflow-y:auto;
+    padding:0 8px 8px;
+    scrollbar-width:thin;
+    scrollbar-color:#ffd166 #222;
+  }
+  .messages::-webkit-scrollbar { width:6px; }
+  .messages::-webkit-scrollbar-track { background:#111; }
+  .messages::-webkit-scrollbar-thumb { background:#ffd166; border-radius:3px; }
+
+  .msg {
+    margin:8px 0;
+    line-height:1.4;
+    animation:fadeIn 0.4s;
+  }
+  @keyframes fadeIn { from {opacity:0; transform:translateY(8px)} to {opacity:1} }
+
+  .user { text-align:right; color:#ffe8a3; }
+  .bot   { color:#ffd166; }
+
+  .input-area {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding-top:8px;
+    border-top:1px solid rgba(255,209,102,.3);
+  }
+
+  input {
+    flex:1;
+    min-width:140px;
+    background:rgba(40,30,0,.5);
+    border:1px solid rgba(255,209,102,.4);
+    color:#ffd166;
+    padding:10px;
+    font-family:inherit;
+  }
+
+  button {
+    background:rgba(255,209,102,.2);
+    border:1px solid #ffd166;
+    color:#ffd166;
+    padding:10px 16px;
+    cursor:pointer;
+    font-family:inherit;
+    transition:background .2s;
+  }
+  button:hover { background:rgba(255,209,102,.35); }
+
+  .quick-buttons {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:8px;
+  }
+
+  .quick-buttons button {
+    min-width:80px;
+    flex:1 1 auto;
+  }
+
+  @media (max-width: 767px) {
+    .container { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+    .left-panel { flex-direction:row; justify-content:center; gap:20px; flex-wrap:wrap; }
+    .robot { width:140px; height:140px; }
+    .head { width:90px; height:90px; }
+    .eye { width:18px; height:18px; top:20px; }
+    .eye.l { left:16px; } .eye.r { right:16px; }
+    .mouth { width:40px; bottom:16px; }
+    .body { width:70px; height:55px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="container">
+  <div class="header">
+    <div class="title">LABORANT.AI2 · IBONARIUM</div>
+    <div class="status-bar">
+      <span><span class="dot"></span>ONLINE</span>
+      <span id="time"></span>
+      <span id="state">ЗАВАНТАЖЕННЯ...</span>
+    </div>
+  </div>
+
+  <div class="left-panel">
+    <div>
+      <div class="robot">
+        <div class="head">
+          <div class="eye l"></div>
+          <div class="eye r"></div>
+          <div class="mouth"></div>
+        </div>
+        <div class="body"></div>
+      </div>
+      <div class="robot-name">LABORANT.AI2</div>
+      <div class="robot-title">ibonarium fragmentor v2.4 · TXT</div>
+    </div>
+  </div>
+
+  <div class="chat">
+    <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
+
+    <div class="messages" id="msgs">
+      <div class="msg bot">
+        вітаю, Романе.<br>
+        завантажую tet.txt...<br>
+        зачекай секунду-дві
+      </div>
+    </div>
+
+    <div class="input-area">
+      <input id="q" placeholder="розкажи / ще / кинь / ібонаріум" autocomplete="off">
+      <button onclick="ask()">→</button>
+    </div>
+
+    <div class="quick-buttons">
+      <button onclick="quickAsk('розкажи')">розкажи</button>
+      <button onclick="quickAsk('цікаво')">цікаво</button>
+      <button onclick="quickAsk('ще')">ще</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ФОН
+const c = document.getElementById("bg"), ctx = c.getContext("2d");
+let W, H, particles = [];
+function resize(){W=c.width=innerWidth;H=c.height=innerHeight;particles=Array.from({length:140},()=> ({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W+1}));}
+resize();addEventListener("resize",resize);
+function drawBg(){ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd166";particles.forEach(p=>{p.z-=0.6;if(p.z<1)p.z=W;const k=140/p.z;const x=(p.x-W/2)*k+W/2;const y=(p.y-H/2)*k+H/2;if(x>0&&y>0&&x<W&&y<H)ctx.fillRect(x,y,1.6,1.6);});requestAnimationFrame(drawBg);}
+drawBg();
+
+// ЧАС
+setInterval(()=>document.getElementById("time").textContent=new Date().toLocaleTimeString("uk-UA"),1000);
+
+let fragments = [];
+
+async function loadTxt() {
+  const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/tet.txt";
+
+  add("Завантажую tet.txt...", "bot");
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+
+    add(`Отримано ${ (text.length / 1024).toFixed(1) } KB`, "bot");
+
+    fragments = text.split(/\n{3,}/)
+      .map(s => s.trim())
+      .filter(s => s.length > 60);
+
+    if (fragments.length === 0) {
+      add("Уривків не знайдено. Можливо, текст без розділів.", "bot");
+      document.getElementById("state").textContent = "НЕМАЄ УРИВКІВ";
+    } else {
+      document.getElementById("state").textContent = `${fragments.length} уривків`;
+      add(`Готово! ${fragments.length} уривків. Натискай кнопки або пиши сам.`, "bot");
+    }
+  } catch (err) {
+    add(`Помилка: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">відкрити tet.txt</a>`, "bot");
+    document.getElementById("state").textContent = "ПОМИЛКА";
+  }
+}
+
+// Додавання повідомлення + автоскрол
+function add(text, cls = "bot") {
+  const div = document.createElement("div");
+  div.className = `msg ${cls}`;
+  div.innerHTML = text.replace(/\n/g, "<br>");
+  const msgs = document.getElementById("msgs");
+  msgs.appendChild(div);
+  // Автоскрол донизу
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// Звичайний запит з input
+function ask() {
+  const input = document.getElementById("q");
+  const val = input.value.trim();
+  if (!val) return;
+  add(val, "user");
+  input.value = "";
+  setTimeout(() => add(getResponse(val), "bot"), 300 + Math.random()*600);
+}
+
+// Швидкі кнопки
+function quickAsk(text) {
+  add(text, "user");
+  setTimeout(() => add(getResponse(text), "bot"), 300 + Math.random()*600);
+}
+
+function getResponse(query) {
+  const q = query.toLowerCase().trim();
+  const triggers = ["розкажи", "ще", "кинь", "ібонаріум", "урив", "фрагмент", "ібо", "цікаво"];
+
+  if (triggers.some(t => q.includes(t) || q === t)) {
+    if (fragments.length === 0) return "Файл ще не завантажився або уривків немає.";
+    const idx = Math.floor(Math.random() * fragments.length);
+    let frag = fragments[idx];
+    if (frag.length > 1300) frag = frag.slice(0,1200) + "\n… (продовження в оригіналі)";
+    return frag;
+  }
+
+  return "Пиши або натискай кнопки: розкажи, цікаво, ще, ібонаріум";
+}
+
+// Enter в полі вводу
+document.getElementById("q").addEventListener("keydown", e => {
+  if (e.key === "Enter") ask();
+});
+
+// Запуск
+loadTxt();
+</script>
+</body>
+</html>
