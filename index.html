@@ -6,25 +6,34 @@
 <title>LABORANT.AI2 · IBONARIUM</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body {
-    width:100%; height:100%;
-    background:#000; color:#ffd166;
-    font-family:"Courier New",monospace;
-    overflow:hidden;
-  }
+html, body {
+  width:100%;
+  min-height:100%;
+  background:#000;
+  color:#ffd166;
+  font-family:"Courier New",monospace;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+
   canvas { position:fixed; inset:0; z-index:0; }
 
   .container {
-    position:relative; z-index:2;
-    height:100vh;
-    max-width: 960px;
-    margin: 0 auto;
-    display:grid;
-    grid-template-columns: 250px 1fr;
-    grid-template-rows: 45px 1fr;
-    gap:10px;
-    padding:10px;
-  }
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 45px 1fr;
+  gap: 10px;
+  padding: 10px;
+}
+
 
   .header {
     grid-column: 1 / -1;
