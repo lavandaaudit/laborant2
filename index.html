@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LABORANT.AI2 · IBONARIUM</title>
 
-<!-- pdf.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
-
-<!-- Tesseract.js (для OCR) -->
-<script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+<!-- PDF.js – актуальне посилання 2025–2026 -->
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.432/build/pdf.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -44,6 +41,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
 </style>
 </head>
 <body>
+
 <canvas id="bg"></canvas>
 
 <div class="container">
@@ -52,7 +50,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="status-bar">
       <span><span class="dot"></span>ONLINE</span>
       <span id="time"></span>
-      <span id="state">LOADING PDF...</span>
+      <span id="state">ЗАВАНТАЖЕННЯ...</span>
     </div>
   </div>
 
@@ -67,7 +65,7 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
         <div class="body"></div>
       </div>
       <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-title">ibonarium fragmentor v1.8 — з OCR</div>
+      <div class="robot-title">ibonarium fragmentor v1.9</div>
     </div>
   </div>
 
@@ -75,63 +73,95 @@ button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;p
     <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
     <div class="messages" id="msgs">
       <div class="msg bot">
-        вітаю, Романе. я laborant.ai2 — видавач уривків ібонаріуму.<br>
-        завантажую PDF + пробую OCR якщо треба...<br>
-        це може зайняти 10–90 секунд залежно від розміру та сканування
+        вітаю, Романе.<br>
+        я laborant.ai2 — видавач уривків ібонаріуму<br><br>
+        зараз завантажую 1.pdf.pdf з GitHub...<br>
+        зачекай 5–20 секунд
       </div>
     </div>
+
     <div class="input-box">
-      <input id="q" placeholder="розкажи / ще / кинь / ібонаріум">
+      <input id="q" placeholder="розкажи / ще / кинь / ібонаріум" autocomplete="off">
       <button onclick="ask()">→</button>
     </div>
   </div>
 </div>
 
 <script>
-// ФОН
-const c = document.getElementById("bg"), ctx = c.getContext("2d");
+// ──────────────────────────────────────────────
+//  ФОН — зірки
+// ──────────────────────────────────────────────
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
 let W, H, particles = [];
-function resize(){W=c.width=innerWidth;H=c.height=innerHeight;particles=Array.from({length:120},()=> ({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W}));}
-resize();addEventListener("resize",resize);
-function drawBg(){ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd166";particles.forEach(p=>{p.z-=0.4;if(p.z<1)p.z=W;const k=120/p.z;const x=(p.x-W/2)*k+W/2;const y=(p.y-H/2)*k+H/2;if(x>0&&y>0&&x<W&&y<H)ctx.fillRect(x,y,1.5,1.5);});requestAnimationFrame(drawBg);}
+
+function resize() {
+  W = c.width = innerWidth;
+  H = c.height = innerHeight;
+  particles = Array.from({length: 140}, () => ({
+    x: Math.random()*W,
+    y: Math.random()*H,
+    z: Math.random()*W + 1
+  }));
+}
+resize();
+addEventListener("resize", resize);
+
+function drawBg() {
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = "#ffd166";
+  particles.forEach(p => {
+    p.z -= 0.6;
+    if (p.z < 1) p.z = W;
+    const k = 140 / p.z;
+    const x = (p.x - W/2) * k + W/2;
+    const y = (p.y - H/2) * k + H/2;
+    if (x>0 && y>0 && x<W && y<H) {
+      ctx.fillRect(x, y, 1.6, 1.6);
+    }
+  });
+  requestAnimationFrame(drawBg);
+}
 drawBg();
 
-// ЧАС
-setInterval(()=>document.getElementById("time").textContent=new Date().toLocaleTimeString("uk-UA"),1000);
+// ──────────────────────────────────────────────
+//  ЧАС
+// ──────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById("time").textContent = new Date().toLocaleTimeString("uk-UA");
+}, 1000);
 
-// pdf.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+// ──────────────────────────────────────────────
+//  PDF.js worker — АКТУАЛЬНЕ ПОСИЛАННЯ
+// ──────────────────────────────────────────────
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.432/build/pdf.worker.min.js';
 
 let fragments = [];
 
 async function loadPDF() {
-  const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/1.pdf.pdf";
-  add("Завантаження PDF почалося...", "bot");
-  
+  const url = "https://github.com/lavandaaudit/laborant2/raw/main/1.pdf.pdf";
+
+  add("починаю завантаження з GitHub...", "bot");
+
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const arrayBuffer = await response.arrayBuffer();
-    add(`PDF отримано (${(arrayBuffer.byteLength / 1024 / 1024).toFixed(2)} MB)`, "bot");
 
-    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    const arrayBuffer = await response.arrayBuffer();
+    add(`файл отримано  (${(arrayBuffer.byteLength / 1024 / 1024).toFixed(2)} MB)`, "bot");
+
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let fullText = "";
 
-    add(`Сторінок: ${pdf.numPages}. Спроба витягти текст...`, "bot");
+    add(`сторінок: ${pdf.numPages}  —  витягаю текст...`, "bot");
 
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      let text = content.items.map(item => item.str.trim()).filter(Boolean).join(' ');
-
-      // Якщо тексту дуже мало — вважаємо сторінку сканованою → запускаємо OCR
-      if (text.length < 80 && i <= 40) {  // обмежуємо кількість OCR-сторінок
-        add(`Сторінка ${i} — мало тексту → запускаю OCR...`, "bot");
-        text = await ocrPage(page);
-      }
-
-      fullText += text + "\n\n";
-      document.getElementById("state").textContent = `Обробка ${i}/${pdf.numPages}`;
+      const pageText = content.items.map(item => item.str).join(" ");
+      fullText += pageText + "\n\n";
+      document.getElementById("state").textContent = `${i} / ${pdf.numPages}`;
     }
 
     fragments = fullText
@@ -140,82 +170,74 @@ async function loadPDF() {
       .filter(s => s.length > 60);
 
     if (fragments.length === 0) {
-      add("Не вдалося витягти жодного нормального уривка. Можливо весь PDF — скан.", "bot");
+      add("не вдалося знайти уривки довші 60 символів", "bot");
+      document.getElementById("state").textContent = "немає тексту";
     } else {
       document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
-      add(`Готово! Знайдено ${fragments.length} уривків. Пиши: розкажи / ще / кинь`, "bot");
+      add(`готово! знайдено ${fragments.length} уривків<br>пиши: розкажи / ще / кинь / ібонаріум`, "bot");
     }
 
   } catch (err) {
     console.error(err);
-    add(`Помилка: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити PDF вручну</a>`, "bot");
-    document.getElementById("state").textContent = "ERROR";
+    add(`ПОМИЛКА: ${err.message}<br><br>посилання:<br><a href="${url}" target="_blank" style="color:#ffd166;">${url}</a>`, "bot");
+    document.getElementById("state").textContent = "ПОМИЛКА";
   }
 }
 
-// Функція OCR для однієї сторінки
-async function ocrPage(page) {
-  try {
-    const scale = 2.0;
-    const viewport = page.getViewport({ scale });
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    const ctx = canvas.getContext("2d");
-
-    await page.render({ canvasContext: ctx, viewport }).promise;
-
-    const { data: { text } } = await Tesseract.recognize(
-      canvas.toDataURL("image/png"),
-      'ukr+eng',   // українська + англійська
-      {
-        logger: m => console.log(m.progress ? Math.round(m.progress*100) : m)
-      }
-    );
-
-    return text.trim() || "[OCR не розпізнав текст]";
-  } catch (e) {
-    console.error("OCR error", e);
-    return "[помилка OCR]";
-  }
-}
-
-// =============================================
-
+// ──────────────────────────────────────────────
+//  ЧАТ
+// ──────────────────────────────────────────────
 function add(text, cls = "bot") {
   const div = document.createElement("div");
   div.className = `msg ${cls}`;
   div.innerHTML = text.replace(/\n/g, "<br>");
-  document.getElementById("msgs").appendChild(div);
-  document.getElementById("msgs").scrollTop = document.getElementById("msgs").scrollHeight;
+  const msgs = document.getElementById("msgs");
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
 function ask() {
   const input = document.getElementById("q");
   const val = input.value.trim();
   if (!val) return;
+
   add(val, "user");
   input.value = "";
-  setTimeout(() => add(getResponse(val), "bot"), 300 + Math.random() * 700);
+
+  setTimeout(() => {
+    add(getResponse(val), "bot");
+  }, 400 + Math.random() * 800);
 }
 
 function getResponse(query) {
-  const q = query.toLowerCase().trim();
-  if (["розкажи", "ще", "кинь", "ібонаріум", "урив", "фрагмент", "ібо"].some(w => q.includes(w))) {
-    if (fragments.length === 0) return "Ще не готово. Зачекай завершення завантаження / OCR.";
+  const q = query.toLowerCase();
+
+  const triggers = ["розкажи", "ще", "кинь", "ібонаріум", "урив", "фрагмент", "ібо"];
+
+  if (triggers.some(t => q.includes(t))) {
+    if (fragments.length === 0) {
+      return "PDF ще не завантажився або тексту немає.\nЗачекай або перевір консоль (F12 → Console)";
+    }
+
     const idx = Math.floor(Math.random() * fragments.length);
     let frag = fragments[idx];
-    if (frag.length > 1400) frag = frag.slice(0, 1300) + "\n… (скорочено)";
+
+    if (frag.length > 1200) {
+      frag = frag.slice(0, 1100) + "\n… (продовження в оригіналі)";
+    }
+
     return frag;
   }
-  return "Пиши щось типу: розкажи, ще, кинь, ібонаріум — видам випадковий уривок.";
+
+  return "пиши щось з цих слів:\nрозкажи • ще • кинь • ібонаріум • уривок";
 }
 
+// Enter
 document.getElementById("q").addEventListener("keydown", e => {
   if (e.key === "Enter") ask();
 });
 
-// Запуск
+// Запускаємо завантаження
 loadPDF();
 </script>
 </body>
