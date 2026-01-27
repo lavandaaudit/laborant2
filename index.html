@@ -2,83 +2,197 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>IBONARIUM · ARHIVE · 25.01.2026</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LABORANT.AI2 · IBONARIUM</title>
+
+<!-- PDF.js – стабільна версія 2025–2026 -->
+<script defer src="https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.530/build/pdf.min.js"></script>
 
 <style>
-html, body {
-  margin: 0;
-  padding: 0;
-  background: #000;
-  height: 100%;
-  overflow-y: auto;
-  line-height: 0;
-}
-
-/* одна сторінка = один екран */
-.section {
-  display: block;
-  width: 100%;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: #000;
-}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#ffd166;font-family:"Courier New",monospace;overflow:hidden;}
+canvas{position:fixed;inset:0;z-index:0;}
+.container{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:360px 1fr;grid-template-rows:60px 1fr;gap:20px;padding:20px;}
+.header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;}
+.title{font-size:20px;letter-spacing:3px;text-shadow:0 0 20px rgba(255,209,102,.8);}
+.status-bar{display:flex;gap:20px;font-size:11px;opacity:.7;}
+.dot{width:6px;height:6px;background:#ffd166;border-radius:50%;display:inline-block;margin-right:5px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.left-panel{display:flex;flex-direction:column;gap:30px;}
+.robot{width:220px;height:220px;position:relative;margin:auto;}
+.head{width:130px;height:130px;border:2px solid #ffd166;border-radius:20px;position:absolute;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,209,102,.05));box-shadow:0 0 35px rgba(255,209,102,.5);animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-12px)}}
+.eye{width:26px;height:26px;background:#ffd166;border-radius:50%;position:absolute;top:36px;box-shadow:0 0 20px #ffd166;}
+.eye.l{left:28px}.eye.r{right:28px}
+.mouth{width:60px;height:3px;background:#ffd166;position:absolute;bottom:30px;left:50%;transform:translateX(-50%);}
+.body{width:110px;height:80px;border:2px solid #ffd166;border-radius:12px;position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(255,209,102,.12);box-shadow:0 0 25px rgba(255,209,102,.4);}
+.robot-name{text-align:center;letter-spacing:2px;margin-top:10px;}
+.robot-title{text-align:center;font-size:11px;opacity:.6;}
+.chat{display:flex;flex-direction:column;}
+.chat-title{text-align:center;margin-bottom:10px;opacity:.7;}
+.messages{flex:1;overflow-y:auto;padding-right:10px;}
+.msg{margin-bottom:14px;animation:fade .3s;}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.user{text-align:right;color:#ffe8a3}
+.bot{color:#ffd166}
+.input-box{display:flex;gap:10px;}
+input{flex:1;background:rgba(40,30,0,.4);border:1px solid rgba(255,209,102,.4);color:#ffd166;padding:10px;}
+button{background:rgba(255,209,102,.15);border:1px solid #ffd166;color:#ffd166;padding:10px 18px;cursor:pointer;}
 </style>
 </head>
-
 <body>
 
-<!-- STACK -->
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/TEST2.ORIGINAL.FILE.25.01.2026/"
-  loading="lazy">
-</iframe>
+<canvas id="bg"></canvas>
 
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/ibonarium.soncemetr.2026/"
-  loading="lazy">
-</iframe>
+<div class="container">
+  <div class="header">
+    <div class="title">LABORANT.AI2 · IBONARIUM</div>
+    <div class="status-bar">
+      <span><span class="dot"></span>ONLINE</span>
+      <span id="time"></span>
+      <span id="state">ЗАВАНТАЖЕННЯ...</span>
+    </div>
+  </div>
 
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/hlam5/"
-  loading="lazy">
-</iframe>
+  <div class="left-panel">
+    <div>
+      <div class="robot">
+        <div class="head">
+          <div class="eye l"></div>
+          <div class="eye r"></div>
+          <div class="mouth"></div>
+        </div>
+        <div class="body"></div>
+      </div>
+      <div class="robot-name">LABORANT.AI2</div>
+      <div class="robot-title">ibonarium fragmentor v2.2</div>
+    </div>
+  </div>
 
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/parsergeopolitical/"
-  loading="lazy">
-</iframe>
+  <div class="chat">
+    <div class="chat-title">💬 ІБОНАРІУМ — УРИВКИ</div>
+    <div class="messages" id="msgs">
+      <div class="msg bot">
+        вітаю, Романе.<br>
+        завантажую 12.pdf з GitHub...<br>
+        зачекай 5–20 секунд (файл текстовий — повинно працювати швидко)
+      </div>
+    </div>
 
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/economic.radar/"
-  loading="lazy">
-</iframe>
+    <div class="input-box">
+      <input id="q" placeholder="розкажи / ще / кинь / ібонаріум" autocomplete="off">
+      <button onclick="ask()">→</button>
+    </div>
+  </div>
+</div>
 
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/new5/"
-  loading="lazy">
-</iframe>
+<script>
+// ФОН — зірки
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
+let W, H, particles = [];
+function resize(){W=c.width=innerWidth;H=c.height=innerHeight;particles=Array.from({length:140},()=> ({x:Math.random()*W,y:Math.random()*H,z:Math.random()*W+1}));}
+resize();addEventListener("resize",resize);
+function drawBg(){ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd166";particles.forEach(p=>{p.z-=0.6;if(p.z<1)p.z=W;const k=140/p.z;const x=(p.x-W/2)*k+W/2;const y=(p.y-H/2)*k+H/2;if(x>0&&y>0&&x<W&&y<H)ctx.fillRect(x,y,1.6,1.6);});requestAnimationFrame(drawBg);}
+drawBg();
 
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/new14/"
-  loading="lazy">
-</iframe>
+// ЧАС
+setInterval(()=>document.getElementById("time").textContent=new Date().toLocaleTimeString("uk-UA"),1000);
 
-<!-- 🔻 DOCENT 1 — ОСТАННІЙ ЕКРАН -->
-<iframe
-  class="section"
-  src="https://lavandaaudit.github.io/Docent.kafedry.ibonariuma/"
-  loading="lazy">
-</iframe>
+// PDF.js worker
+let fragments = [];
 
+window.addEventListener('load', () => {
+  if (typeof pdfjsLib === 'undefined') {
+    add("PDF.js не завантажився (pdfjsLib не визначено).<br>Спробуй: Ctrl+F5, інший браузер, вимкни AdBlock/VPN.", "bot");
+    document.getElementById("state").textContent = "PDF.js ERROR";
+    return;
+  }
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.530/build/pdf.worker.min.js';
+
+  const url = "https://raw.githubusercontent.com/lavandaaudit/laborant2/main/12.pdf";
+
+  add("PDF.js готовий. Завантажую 12.pdf...", "bot");
+
+  fetch(url, { mode: 'cors' })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status} — файл не знайдено або проблема з доступом`);
+      return res.arrayBuffer();
+    })
+    .then(arrayBuffer => {
+      add(`Отримано ${(arrayBuffer.byteLength / 1024 / 1024).toFixed(2)} МБ`, "bot");
+      return pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    })
+    .then(pdf => {
+      let fullText = "";
+      add(`Сторінок: ${pdf.numPages} — витягаю текст...`, "bot");
+
+      const promises = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        promises.push(
+          pdf.getPage(i).then(page => page.getTextContent())
+            .then(content => {
+              const pageText = content.items.map(item => item.str.trim()).filter(Boolean).join(' ');
+              fullText += pageText + "\n\n";
+              document.getElementById("state").textContent = `Стор. ${i}/${pdf.numPages}`;
+            })
+        );
+      }
+
+      return Promise.all(promises).then(() => fullText);
+    })
+    .then(fullText => {
+      fragments = fullText.split(/\n\s*\n+/).map(s => s.trim()).filter(s => s.length > 60);
+
+      if (fragments.length === 0) {
+        add("Текст не знайдено (можливо, PDF все ж растрований або порожній). Спробуй OCR онлайн: ocr.space, Ukrainian.", "bot");
+        document.getElementById("state").textContent = "НЕМАЄ УРИВКІВ";
+      } else {
+        document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
+        add(`Готово! Знайдено ${fragments.length} уривків.<br>Пиши: розкажи / ще / кинь / ібонаріум`, "bot");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      add(`Помилка: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити PDF вручну</a><br>Перевір F12 → Console/Network`, "bot");
+      document.getElementById("state").textContent = "ПОМИЛКА";
+    });
+});
+
+// ЧАТ
+function add(text, cls = "bot") {
+  const div = document.createElement("div");
+  div.className = `msg ${cls}`;
+  div.innerHTML = text.replace(/\n/g, "<br>");
+  const msgs = document.getElementById("msgs");
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function ask() {
+  const input = document.getElementById("q");
+  const val = input.value.trim();
+  if (!val) return;
+  add(val, "user");
+  input.value = "";
+  setTimeout(() => add(getResponse(val), "bot"), 400 + Math.random() * 700);
+}
+
+function getResponse(query) {
+  const q = query.toLowerCase();
+  const triggers = ["розкажи", "ще", "кинь", "ібонаріум", "урив", "фрагмент", "ібо"];
+  if (triggers.some(t => q.includes(t))) {
+    if (fragments.length === 0) return "Ще не готово або немає тексту. Зачекай / перевір консоль (F12).";
+    const idx = Math.floor(Math.random() * fragments.length);
+    let frag = fragments[idx];
+    if (frag.length > 1200) frag = frag.slice(0, 1100) + "\n… (скорочено)";
+    return frag;
+  }
+  return "Пиши фразу з: розкажи, ще, кинь, ібонаріум";
+}
+
+document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
+</script>
 </body>
 </html>
