@@ -32,7 +32,6 @@ canvas{position:fixed;inset:0;z-index:0;}
 .user{text-align:right;color:#ffe8a3}
 .bot{color:#ffd166}
 .input-box{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-input{flex:1;background:rgba(40,30,0,.4);border:1px solid rgba(255,209,102,.4);color:#ffd166;padding:10px;}
 button{
   background:rgba(255,209,102,.15);
   border:1px solid #ffd166;
@@ -75,8 +74,7 @@ button:hover{background:rgba(255,209,102,.3);}
     <div class="messages" id="msgs">
       <div class="msg bot">
         вітаю, Романе.<br>
-        завантажую tet.txt з GitHub...<br>
-        це текстовий файл — підгрузиться миттєво
+        завантажую tet.txt з GitHub...
       </div>
     </div>
     <div class="input-box">
@@ -107,25 +105,27 @@ async function loadTxt() {
   add("Завантажую tet.txt...", "bot");
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status} — файл не знайдено`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
-    add(`Отримано ${ (text.length / 1024).toFixed(1) } KB тексту`, "bot");
+    add(`Отримано ${ (text.length / 1024).toFixed(1) } KB`, "bot");
 
-    // Розбиваємо на уривки по 3+ порожніх рядках
-    fragments = text.split(/\n{3,}/)
+    // Розбиваємо по 2+ порожніх рядках (більш гнучко)
+    fragments = text.split(/\n{2,}/)
       .map(s => s.trim())
-      .filter(s => s.length > 60);
+      .filter(s => s.length > 40 && !s.startsWith('#')); // прибираємо можливі заголовки
 
     if (fragments.length === 0) {
-      add("Уривків не знайдено. Можливо, текст без розділів або короткий. Перевір файл.", "bot");
-      document.getElementById("state").textContent = "НЕМАЄ УРИВКІВ";
+      add("УВАГА: уривків не знайдено після розбиття.<br>Можливо, в tet.txt немає достатньо порожніх рядків.<br>Вміст завантажено, але не розділено.", "bot");
+      document.getElementById("state").textContent = "OK, АЛЕ БЕЗ УРИВКІВ";
+      // на всяк випадок додаємо весь текст як один уривок
+      if (text.trim().length > 100) fragments = [text.trim()];
     } else {
       document.getElementById("state").textContent = `OK · ${fragments.length} уривків`;
       add(`Готово! Знайдено ${fragments.length} уривків.<br>Натискай кнопки внизу`, "bot");
     }
   } catch (err) {
     console.error(err);
-    add(`Помилка: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити tet.txt вручну</a>`, "bot");
+    add(`ПОМИЛКА ЗАВАНТАЖЕННЯ: ${err.message}<br><a href="${url}" target="_blank" style="color:#ffd166;">Відкрити tet.txt</a>`, "bot");
     document.getElementById("state").textContent = "ПОМИЛКА";
   }
 }
@@ -137,18 +137,17 @@ function add(text, cls = "bot") {
   div.innerHTML = text.replace(/\n/g, "<br>");
   const msgs = document.getElementById("msgs");
   msgs.appendChild(div);
-  // плавний скрол донизу
   msgs.scrollTo({ top: msgs.scrollHeight, behavior: "smooth" });
 }
 
 function tell() {
   if (fragments.length === 0) {
-    add("Файл ще не завантажився або немає уривків. Зачекай трохи.", "bot");
+    add("Ще немає уривків. Зачекай завантаження або перевір консоль (F12).", "bot");
     return;
   }
   const idx = Math.floor(Math.random() * fragments.length);
-  const frag = fragments[idx];  // без скорочення
-  setTimeout(() => add(frag, "bot"), 300 + Math.random() * 800);
+  const frag = fragments[idx];
+  setTimeout(() => add(frag, "bot"), 400 + Math.random() * 600);
 }
 
 document.addEventListener("DOMContentLoaded", loadTxt);
