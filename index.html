@@ -120,7 +120,7 @@
   }
 
   .user {
-    color: #aaffaa;               /* зелений для твоїх повідомлень */
+    color: #aaffaa;
     background: rgba(170,255,170,0.12);
     align-self: flex-end;
     text-align: right;
@@ -185,7 +185,7 @@
         <div class="body"></div>
       </div>
       <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-title">ibonarium fragmentor v2.6 · TXT</div>
+      <div class="robot-title">ibonarium fragmentor v2.7 · TXT</div>
     </div>
   </div>
 
@@ -264,19 +264,42 @@ function add(text, cls = "bot") {
   }, 60);
 }
 
+function getRandomSentences(fragment) {
+  // Розбиваємо уривок на речення (за крапками, знаками питання, окликами)
+  const sentences = fragment
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10);
+
+  if (sentences.length === 0) return fragment;
+  if (sentences.length === 1) return sentences[0];
+
+  // Вибираємо 1 або 2 речення випадково
+  const count = Math.random() < 0.6 ? 1 : 2; // ~60% шанс на 1 речення, 40% на 2
+  const start = Math.floor(Math.random() * (sentences.length - count + 1));
+  const selected = sentences.slice(start, start + count);
+
+  return selected.join(" ");
+}
+
 function tell() {
   if (fragments.length === 0) {
     add("Ще немає уривків — зачекай завантаження.", "bot");
     return;
   }
 
-  // Додаємо твоє "питання" зеленим перед відповіддю
+  // Додаємо натискання кнопки як повідомлення користувача (зеленим)
   const buttonText = event.target.innerText;
   add(buttonText, "user");
 
+  // Вибираємо випадковий уривок
   const idx = Math.floor(Math.random() * fragments.length);
-  const frag = fragments[idx];
-  setTimeout(() => add(frag, "bot"), 600 + Math.random() * 800);
+  const fullFrag = fragments[idx];
+
+  // Беремо 1-2 речення
+  const shortFrag = getRandomSentences(fullFrag);
+
+  setTimeout(() => add(shortFrag, "bot"), 600 + Math.random() * 800);
 }
 
 document.addEventListener("DOMContentLoaded", loadTxt);
