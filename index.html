@@ -17,11 +17,13 @@
   .container {
     position:relative; z-index:2;
     height:100vh;
+    max-width: 960px;                   /* обмеження ширини для центрування */
+    margin: 0 auto;                     /* центрування */
     display:grid;
-    grid-template-columns: 280px 1fr;
-    grid-template-rows: 50px 1fr;
-    gap:12px;
-    padding:12px;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: 45px 1fr;
+    gap:10px;
+    padding:10px;
   }
 
   .header {
@@ -30,48 +32,48 @@
     justify-content:space-between;
     align-items:center;
   }
-  .title { font-size:18px; letter-spacing:2px; text-shadow:0 0 16px rgba(255,209,102,.7); }
+  .title { font-size:15px; letter-spacing:1.8px; text-shadow:0 0 14px rgba(255,209,102,.7); }
   .status-bar {
-    display:flex; gap:12px; font-size:10px; opacity:.8;
+    display:flex; gap:10px; font-size:9px; opacity:.8;
   }
   .dot {
-    width:6px; height:6px; background:#ffd166; border-radius:50%;
+    width:5px; height:5px; background:#ffd166; border-radius:50%;
     display:inline-block; margin-right:4px;
     animation:pulse 1.6s infinite;
   }
   @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:.4} }
 
   .left-panel {
-    display:flex; flex-direction:column; align-items:center; gap:20px;
+    display:flex; flex-direction:column; align-items:center; gap:16px;
   }
 
   .robot {
-    width:180px; height:180px; position:relative;
+    width:160px; height:160px; position:relative;
   }
   .head {
-    width:110px; height:110px;
-    border:2px solid #ffd166; border-radius:16px;
+    width:98px; height:98px;
+    border:2px solid #ffd166; border-radius:14px;
     position:absolute; left:50%; top:0;
     transform:translateX(-50%);
     background:linear-gradient(135deg,rgba(255,209,102,.3),rgba(255,209,102,.08));
-    box-shadow:0 0 28px rgba(255,209,102,.45);
+    box-shadow:0 0 24px rgba(255,209,102,.45);
     animation:float 3s ease-in-out infinite;
   }
-  @keyframes float { 0%,100% {transform:translate(-50%,0)} 50% {transform:translate(-50%,-10px)} }
+  @keyframes float { 0%,100% {transform:translate(-50%,0)} 50% {transform:translate(-50%,-9px)} }
 
-  .eye { width:22px; height:22px; background:#ffd166; border-radius:50%;
-    position:absolute; top:30px; box-shadow:0 0 18px #ffd166; }
-  .eye.l { left:24px; } .eye.r { right:24px; }
+  .eye { width:20px; height:20px; background:#ffd166; border-radius:50%;
+    position:absolute; top:27px; box-shadow:0 0 16px #ffd166; }
+  .eye.l { left:22px; } .eye.r { right:22px; }
 
-  .mouth { width:52px; height:3px; background:#ffd166;
-    position:absolute; bottom:26px; left:50%; transform:translateX(-50%); }
+  .mouth { width:46px; height:2px; background:#ffd166;
+    position:absolute; bottom:23px; left:50%; transform:translateX(-50%); }
 
-  .body { width:92px; height:68px; border:2px solid #ffd166; border-radius:10px;
+  .body { width:82px; height:60px; border:2px solid #ffd166; border-radius:9px;
     position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-    background:rgba(255,209,102,.15); box-shadow:0 0 20px rgba(255,209,102,.4); }
+    background:rgba(255,209,102,.15); box-shadow:0 0 18px rgba(255,209,102,.4); }
 
-  .robot-name { text-align:center; letter-spacing:1.6px; margin-top:8px; font-size:13px; }
-  .robot-title { font-size:9px; opacity:.7; text-align:center; }
+  .robot-name { text-align:center; letter-spacing:1.4px; margin-top:7px; font-size:12px; }
+  .robot-title { font-size:8px; opacity:.7; text-align:center; }
 
   .chat {
     display: flex;
@@ -80,12 +82,12 @@
     min-height: 0;
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(255,209,102,0.18);
-    border-radius: 6px;
+    border-radius: 5px;
     overflow: hidden;
   }
 
   .chat-title {
-    text-align:center; padding:8px 0; opacity:.85; font-size:12px;
+    text-align:center; padding:6px 0; opacity:.85; font-size:11px;
     border-bottom: 1px solid rgba(255,209,102,0.15);
     background: rgba(255,209,102,0.04);
   }
@@ -94,22 +96,22 @@
     flex: 1 1 auto;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 10px 12px;
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.45;
     scrollbar-width: thin;
     scrollbar-color: #ffd166 #111;
   }
-  .messages::-webkit-scrollbar { width: 6px; }
+  .messages::-webkit-scrollbar { width: 5px; }
   .messages::-webkit-scrollbar-track { background: #0a0a0a; }
   .messages::-webkit-scrollbar-thumb { background: #ffd166; border-radius: 3px; }
   .messages::-webkit-scrollbar-thumb:hover { background: #ffdb80; }
 
   .msg {
-    margin: 8px 0;
-    padding: 6px 10px;
+    margin: 6px 0;
+    padding: 5px 9px;
     border-radius: 4px;
-    max-width: 92%;
+    max-width: 94%;
     word-wrap: break-word;
   }
 
@@ -129,15 +131,15 @@
   .input-box {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: 6px;
+    padding: 8px 10px;
     border-top: 1px solid rgba(255,209,102,0.2);
     background: rgba(0,0,0,0.5);
   }
 
   .quick-buttons {
     display: flex;
-    gap: 8px;
+    gap: 7px;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -146,17 +148,17 @@
     background: rgba(255,209,102,0.2);
     border: 1px solid #ffd166;
     color: #ffd166;
-    padding: 8px 14px;
+    padding: 7px 12px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 11px;
     white-space: nowrap;
     border-radius: 4px;
     transition: all 0.16s;
   }
   button:hover {
     background: rgba(255,209,102,0.35);
-    box-shadow: 0 0 8px rgba(255,209,102,0.4);
+    box-shadow: 0 0 7px rgba(255,209,102,0.4);
   }
 </style>
 </head>
@@ -265,7 +267,6 @@ function add(text, cls = "bot") {
 }
 
 function getRandomSentences(fragment) {
-  // Розбиваємо уривок на речення (за крапками, знаками питання, окликами)
   const sentences = fragment
     .split(/(?<=[.!?])\s+/)
     .map(s => s.trim())
@@ -274,8 +275,7 @@ function getRandomSentences(fragment) {
   if (sentences.length === 0) return fragment;
   if (sentences.length === 1) return sentences[0];
 
-  // Вибираємо 1 або 2 речення випадково
-  const count = Math.random() < 0.6 ? 1 : 2; // ~60% шанс на 1 речення, 40% на 2
+  const count = Math.random() < 0.6 ? 1 : 2;
   const start = Math.floor(Math.random() * (sentences.length - count + 1));
   const selected = sentences.slice(start, start + count);
 
@@ -288,15 +288,11 @@ function tell() {
     return;
   }
 
-  // Додаємо натискання кнопки як повідомлення користувача (зеленим)
   const buttonText = event.target.innerText;
   add(buttonText, "user");
 
-  // Вибираємо випадковий уривок
   const idx = Math.floor(Math.random() * fragments.length);
   const fullFrag = fragments[idx];
-
-  // Беремо 1-2 речення
   const shortFrag = getRandomSentences(fullFrag);
 
   setTimeout(() => add(shortFrag, "bot"), 600 + Math.random() * 800);
