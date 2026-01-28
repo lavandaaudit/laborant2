@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LABORANT.AI2 · IBONARIUM</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -202,6 +202,114 @@ html, body {
     background: rgba(255,209,102,0.35);
     box-shadow: 0 0 7px rgba(255,209,102,0.4);
   }
+
+  /* --- MOBILE ADAPTATION START --- */
+  @media (max-width: 768px) {
+    html, body {
+      height: 100%;
+      overflow: hidden; /* Lock body scroll to make it behave like an app */
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 8px;
+      gap: 8px;
+      /* Undo grid properties */
+      grid-template-columns: none;
+      grid-template-rows: none;
+    }
+
+    .header {
+      flex: 0 0 auto;
+      margin-bottom: 2px;
+    }
+
+    .left-panel {
+      flex: 0 0 auto;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding-bottom: 5px;
+    }
+
+    /* Wrap content inside left-panel to layout horizontally */
+    .left-panel > div {
+       display: grid;
+       grid-template-columns: auto 1fr;
+       gap: 12px;
+       align-items: center;
+       width: 100%;
+    }
+
+    .robot {
+      /* Scale down robot */
+      width: 100px; 
+      height: 100px;
+      transform: scale(0.65);
+      transform-origin: center;
+      margin: -16px; /* Compensate for empty space due to scaling */
+    }
+
+    /* Right side of the robot header (Text info) */
+    .robot-info-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .robot-name { 
+      margin-top: 0; 
+      text-align: left; 
+      font-size: 13px;
+    }
+    .robot-desc { 
+      text-align: left; 
+      margin-top: 2px;
+    }
+    .robot-title { 
+      text-align: left; 
+      margin-top: 2px; 
+    }
+
+    .projects {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      text-align: left;
+    }
+    .projects h4 {
+      display: none; /* Hide 'PROJECTS' title to save space, or make inline */
+    }
+    .projects a {
+      background: rgba(255,209,102,0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    /* THE CHAT DIALOG - EXPAND VERTICALLY */
+    .chat {
+      flex: 1 1 auto; /* Fill all remaining vertical space */
+      width: 100%;
+      margin: 0;
+      min-height: 0; /* Critical flex fix */
+    }
+    
+    /* Ensure input area sticks to bottom and buttons wrap nicely */
+    .quick-buttons {
+      gap: 5px;
+    }
+    button {
+      padding: 10px 14px; /* Larger touch targets */
+      font-size: 12px;
+    }
+  }
+  /* --- MOBILE ADAPTATION END --- */
 </style>
 </head>
 <body>
@@ -228,19 +336,23 @@ html, body {
         </div>
         <div class="body"></div>
       </div>
-      <div class="robot-name">LABORANT.AI2</div>
-      <div class="robot-desc">
-        Теоретик кафедри ібонаріуму<br>
-        лектор теорії<br>
-        асистент по проєктам лютого 2026
-      </div>
-      <div class="robot-title">ibonarium fragmentor v2.7 · TXT</div>
+      
+      <!-- Wrapper for text info to help with mobile layout -->
+      <div class="robot-info-block">
+        <div class="robot-name">LABORANT.AI2</div>
+        <div class="robot-desc">
+          Теоретик кафедри ібонаріуму<br>
+          лектор теорії<br>
+          асистент по проєктам лютого 2026
+        </div>
+        <div class="robot-title">ibonarium fragmentor v2.7 · TXT</div>
 
-      <div class="projects">
-        <h4>ПРОЄКТИ</h4>
-        <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0201</a>
-        <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0202</a>
-        <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0203</a>
+        <div class="projects">
+          <h4>ПРОЄКТИ</h4>
+          <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0201</a>
+          <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0202</a>
+          <a href="https://lavandaaudit.github.io/test2/" target="_blank">project0203</a>
+        </div>
       </div>
     </div>
   </div>
